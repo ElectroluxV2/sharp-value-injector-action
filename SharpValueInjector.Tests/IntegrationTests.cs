@@ -146,4 +146,25 @@ public class IntegrationTests
         await Assert.That(code).IsEqualTo(0);
         await Assert.That(beforeFile).IsTheSame(afterFile);
     }
+
+    [Test]
+    public async Task Injection_ShouldWork_WhenInputHasConflict()
+    {
+        var beforeFile = Path.Combine(_samplesDirectory, "Conflict", "before.yml");
+        var code = await InjectorApp.BootstrapAsync(
+            [beforeFile],
+            [Path.Combine(_samplesDirectory, "Conflict", "input.json")],
+            true,
+            false,
+            "#{",
+            "}",
+            null,
+            LogLevel.Information
+        );
+
+        var afterFile = Path.Combine(_samplesDirectory, "Conflict", "after.yml");
+
+        await Assert.That(code).IsEqualTo(0);
+        await Assert.That(beforeFile).IsTheSame(afterFile);
+    }
 }

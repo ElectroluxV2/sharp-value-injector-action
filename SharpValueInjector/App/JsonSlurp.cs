@@ -57,7 +57,10 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
                 };
                 
                 logger.LogDebug("Found key {Key} with value {Value}", key, value);
-                dictionary.Add(key, value!);
+                if (dictionary.TryAdd(key, value!)) continue;
+
+                logger.LogWarning("Key {Key} already exists, overwriting", key);
+                dictionary[key] = value!;
             }
         }
 
