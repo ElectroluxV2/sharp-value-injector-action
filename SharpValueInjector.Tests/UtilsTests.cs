@@ -7,17 +7,18 @@ using static Utils;
 public class UtilsTests
 {
     [Test]
-    public async Task Should_convert_bytes_to_human_string()
+    [Arguments(0L, "0B")]
+    [Arguments(1_024L, "1KiB")]
+    [Arguments(1_024L * 1_024, "1MiB")]
+    [Arguments(1_024L * 1_024 * 1_024, "1GiB")]
+    [Arguments(1_024L * 1_024 * 1_024 * 1_024, "1TiB")]
+    [Arguments(1_024L * 1_024 * 1_024 * 1_024 * 1_024, "1PiB")]
+    [Arguments(1_024L * 1_024 * 1_024 * 1_024 * 1_024 * 1_024, "1EiB")]
+    [Arguments(5_823_996_738L, "5.42GiB")]
+    [Arguments(long.MaxValue, "8EiB")]
+    [Arguments(long.MinValue + 1, "-8EiB")]
+    public async Task Should_convert_bytes_to_human_string(long bytes, string expected)
     {
-        await Assert.That(BytesToString(0L)).IsEqualTo("0B");
-        await Assert.That(BytesToString(1_024L)).IsEqualTo("1KiB");
-        await Assert.That(BytesToString(1_024L * 1_024)).IsEqualTo("1MiB");
-        await Assert.That(BytesToString(1_024L * 1_024 * 1_024)).IsEqualTo("1GiB");
-        await Assert.That(BytesToString(1_024L * 1_024 * 1_024 * 1_024)).IsEqualTo("1TiB");
-        await Assert.That(BytesToString(1_024L * 1_024 * 1_024 * 1_024 * 1_024)).IsEqualTo("1PiB");
-        await Assert.That(BytesToString(1_024L * 1_024 * 1_024 * 1_024 * 1_024 * 1_024)).IsEqualTo("1EiB");
-        await Assert.That(BytesToString(5_823_996_738L)).IsEqualTo("5.42GiB");
-        await Assert.That(BytesToString(long.MaxValue)).IsEqualTo("8EiB");
-        await Assert.That(BytesToString(long.MinValue+1)).IsEqualTo("-8EiB");
+        await Assert.That(BytesToString(bytes)).IsEqualTo(expected);
     }
 }
