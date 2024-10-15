@@ -167,4 +167,55 @@ public class IntegrationTests
         await Assert.That(code).IsEqualTo(0);
         await Assert.That(beforeFile).IsTheSame(afterFile);
     }
+
+
+    [Test]
+    public async Task Injection_ShouldWork_WithHierarchicalInputs_Case1()
+    {
+        var beforeFile = Path.Combine(_samplesDirectory, "Hierarchy", "before.yml");
+        var code = await InjectorApp.BootstrapAsync(
+            [beforeFile],
+            [
+                Path.Combine(_samplesDirectory, "Hierarchy", "input-a.json"),
+                Path.Combine(_samplesDirectory, "Hierarchy", "input-b.json"),
+                Path.Combine(_samplesDirectory, "Hierarchy", "input-c.json"),
+            ],
+            true,
+            false,
+            "#{",
+            "}",
+            null,
+            LogLevel.Information
+        );
+
+        var afterFile = Path.Combine(_samplesDirectory, "Hierarchy", "after-c.yml");
+
+        await Assert.That(code).IsEqualTo(0);
+        await Assert.That(beforeFile).IsTheSame(afterFile);
+    }
+
+    [Test]
+    public async Task Injection_ShouldWork_WithHierarchicalInputs_Case2()
+    {
+        var beforeFile = Path.Combine(_samplesDirectory, "Hierarchy", "before.yml");
+        var code = await InjectorApp.BootstrapAsync(
+            [beforeFile],
+            [
+                Path.Combine(_samplesDirectory, "Hierarchy", "input-c.json"),
+                Path.Combine(_samplesDirectory, "Hierarchy", "input-b.json"),
+                Path.Combine(_samplesDirectory, "Hierarchy", "input-a.json"),
+            ],
+            true,
+            false,
+            "#{",
+            "}",
+            null,
+            LogLevel.Information
+        );
+
+        var afterFile = Path.Combine(_samplesDirectory, "Hierarchy", "after-a.yml");
+
+        await Assert.That(code).IsEqualTo(0);
+        await Assert.That(beforeFile).IsTheSame(afterFile);
+    }
 }

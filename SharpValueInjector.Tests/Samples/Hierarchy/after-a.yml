@@ -1,0 +1,3 @@
+cases:
+- name: "Hierarchical value injection"
+  value: "a"
