@@ -1,0 +1,3 @@
+cases:
+- name: "Reference value injection"
+  value: "#{a}"

@@ -1,0 +1,4 @@
+cases:
+- name: "Recurse value injection"
+  value: "#{a}"
+  second: "#{d}"

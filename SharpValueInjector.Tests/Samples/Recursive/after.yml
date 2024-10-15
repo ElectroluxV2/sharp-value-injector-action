@@ -1,0 +1,4 @@
+cases:
+- name: "Recurse value injection"
+  value: "Error: Recursion detected for key `b`!"
+  second: "-e-"

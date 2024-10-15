@@ -1,0 +1,4 @@
+cases:
+- name: "Numeric vales injection"
+  double: 21.37
+  integer: 21
