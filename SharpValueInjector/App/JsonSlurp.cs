@@ -1,4 +1,5 @@
 
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace SharpValueInjector.App;
 
 public class JsonSlurp(ILogger<JsonSlurp> logger)
 {
-    public Dictionary<string, string> Flatten(ReadOnlySpan<byte> json)
+    public FrozenDictionary<string, string> Flatten(ReadOnlySpan<byte> json)
     {
         logger.LogDebug("Parsing JSON size: {JsonSize}", Utils.BytesToString(json.Length));
         
@@ -53,7 +54,7 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
                     JsonTokenType.True => "true",
                     JsonTokenType.False => "false",
                     JsonTokenType.Null => null,
-                    _ => throw new NotSupportedException()
+                    _ => throw new NotSupportedException(),
                 };
                 
                 logger.LogDebug("Found key {Key} with value {Value}", key, value);
@@ -64,6 +65,6 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
             }
         }
 
-        return dictionary;
+        return dictionary.ToFrozenDictionary();
     }
 }

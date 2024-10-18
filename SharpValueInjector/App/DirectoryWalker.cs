@@ -32,7 +32,6 @@ public class DirectoryWalker(ILogger<DirectoryWalker> logger, ConsoleCancellatio
             {
                 logger.LogInformation("Found file {File}", file);
                 yield return file;
-                await Task.Delay(100, cancellationToken.Token);
             }
         }
     }

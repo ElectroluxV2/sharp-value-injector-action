@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,7 @@ namespace SharpValueInjector.App;
 
 public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolver> logger, JsonSlurp jsonSlurp)
 {
-    public async Task<Dictionary<string, string>> MakeFromInputFilesAsync(IReadOnlyCollection<string> inputFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
+    public async Task<FrozenDictionary<string, string>> MakeFromInputFilesAsync(IReadOnlyCollection<string> inputFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {
         // This will contain all injectable values (both plain values & AWS SM ARNs)
         var conflictlessInjections = new Dictionary<string, string>();
@@ -70,6 +71,6 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
         
         // Now we can resolve all the injections
         return conflictlessInjections.Keys
-            .ToDictionary(injectionKey => injectionKey, injectionKey => serviceProvider.GetRequiredKeyedService<string>(injectionKey));
+            .ToFrozenDictionary(injectionKey => injectionKey, injectionKey => serviceProvider.GetRequiredKeyedService<string>(injectionKey));
     }
 }

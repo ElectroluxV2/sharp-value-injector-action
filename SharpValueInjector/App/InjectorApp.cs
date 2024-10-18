@@ -7,7 +7,15 @@ using SharpValueInjector.Shared;
 
 namespace SharpValueInjector.App;
 
-public class InjectorApp(ILogger<InjectorApp> logger, SharpValueInjectionConfiguration configuration, IServiceProvider serviceProvider, ConsoleCancellationToken consoleCancellationToken)
+public class InjectorApp(
+    ILogger<InjectorApp> logger,
+    SharpValueInjectionConfiguration configuration,
+    FileOrDirectoryWithPatternResolver fileOrDirectoryWithPatternResolver,
+    DirectoryWalker directoryWalker,
+    HierarchicalInjectionsResolver hierarchicalInjectionsResolver,
+    FileInjector fileInjector,
+    ConsoleCancellationToken consoleCancellationToken
+)
 {
     public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string? awsSmToken, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
@@ -38,10 +46,6 @@ public class InjectorApp(ILogger<InjectorApp> logger, SharpValueInjectionConfigu
 
     private async Task<int> RunAsync()
     {
-        var fileOrDirectoryWithPatternResolver = serviceProvider.GetRequiredService<FileOrDirectoryWithPatternResolver>();
-        var directoryWalker = serviceProvider.GetRequiredService<DirectoryWalker>();
-
-
         var (inputFilesFromConfiguration, inputDirectoriesAndPatterns) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.InputFiles);
         var inputFiles = await directoryWalker
             .WalkAsync(inputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
@@ -52,8 +56,7 @@ public class InjectorApp(ILogger<InjectorApp> logger, SharpValueInjectionConfigu
 
         // This will contain all injectable values (both plain values & AWS SM ARNs)
         // TODO: Implement ARN resolution
-        var injections = await serviceProvider
-            .GetRequiredService<HierarchicalInjectionsResolver>()
+        var injections = await hierarchicalInjectionsResolver
             .MakeFromInputFilesAsync(inputFiles, configuration.OpeningToken, configuration.ClosingToken, consoleCancellationToken);
         
         // Print all resolved injections
@@ -61,14 +64,11 @@ public class InjectorApp(ILogger<InjectorApp> logger, SharpValueInjectionConfigu
         {
             logger.LogInformation("Resolved key {Key} with value {Value}", key, value);
         }
-        
 
         var (outputFilesFromConfiguration, outputDirectoriesAndPatterns) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);
         var outputFiles = directoryWalker
             .WalkAsync(outputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
             .Concat(outputFilesFromConfiguration.ToAsyncEnumerable());
-        
-        var fileInjector = serviceProvider.GetRequiredService<FileInjector>();
 
         // Concurrent inject
         await outputFiles

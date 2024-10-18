@@ -5,7 +5,7 @@ namespace SharpValueInjector.App;
 
 public class FileInjector(ILogger<FileInjector> logger)
 {
-    public async ValueTask InjectAsync(string path, string openingToken, string closingToken, Dictionary<string, string> injections, CancellationToken cancellationToken)
+    public async ValueTask InjectAsync(string path, string openingToken, string closingToken, IDictionary<string, string> injections, CancellationToken cancellationToken)
     {
         try
         {
