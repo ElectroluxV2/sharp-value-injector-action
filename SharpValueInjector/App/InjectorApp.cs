@@ -38,11 +38,23 @@ public class InjectorApp(ILogger<InjectorApp> logger, SharpValueInjectionConfigu
 
     private async Task<int> RunAsync()
     {
+        var fileOrDirectoryWithPatternResolver = serviceProvider.GetRequiredService<FileOrDirectoryWithPatternResolver>();
+        var directoryWalker = serviceProvider.GetRequiredService<DirectoryWalker>();
+
+
+        var (inputFilesFromConfiguration, inputDirectoriesAndPatterns) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.InputFiles);
+        var inputFiles = await directoryWalker
+            .WalkAsync(inputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
+            .Concat(inputFilesFromConfiguration.ToAsyncEnumerable())
+            .ToListAsync();
+
+        logger.LogInformation("Input files: {InputFiles}", inputFiles);
+
         // This will contain all injectable values (both plain values & AWS SM ARNs)
         // TODO: Implement ARN resolution
         var injections = await serviceProvider
             .GetRequiredService<HierarchicalInjectionsResolver>()
-            .MakeFromInputFilesAsync(configuration.InputFiles, configuration.OpeningToken, configuration.ClosingToken, consoleCancellationToken);
+            .MakeFromInputFilesAsync(inputFiles, configuration.OpeningToken, configuration.ClosingToken, consoleCancellationToken);
         
         // Print all resolved injections
         foreach (var (key, value) in injections)
@@ -50,11 +62,9 @@ public class InjectorApp(ILogger<InjectorApp> logger, SharpValueInjectionConfigu
             logger.LogInformation("Resolved key {Key} with value {Value}", key, value);
         }
         
-        var fileOrDirectoryWithPatternResolver = serviceProvider.GetRequiredService<FileOrDirectoryWithPatternResolver>();
+
         var (outputFilesFromConfiguration, outputDirectoriesAndPatterns) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);
-        
-        var outputFileWalker = serviceProvider.GetRequiredService<DirectoryWalker>();
-        var outputFiles = outputFileWalker
+        var outputFiles = directoryWalker
             .WalkAsync(outputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
             .Concat(outputFilesFromConfiguration.ToAsyncEnumerable());
         

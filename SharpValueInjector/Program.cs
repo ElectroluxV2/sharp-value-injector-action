@@ -5,7 +5,7 @@ using Spectre.Console;
 using static SharpValueInjector.Shared.ConsoleLifetimeUtils;
 
 var outputFilesArgument = new Argument<string[]>("output", "Files to inject values into or directories to scan (may contain file name patterns such as '/sample/path/*.yaml'.).");
-var inputFilesOption = new Option<string[]>("--input", "Path to JSON file that contain values to inject into target files. To specify multiple files, use multiple --input options. Order matters when resolving conflicts.")
+var inputFilesOption = new Option<string[]>("--input", "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain values to inject into target files. To specify multiple files, use multiple --input options. Order matters when resolving conflicts.")
 {
     IsRequired = true,
 };

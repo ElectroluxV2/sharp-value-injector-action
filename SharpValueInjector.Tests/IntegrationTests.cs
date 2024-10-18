@@ -6,6 +6,7 @@ using SharpValueInjector.App;
 namespace SharpValueInjector.Tests;
 
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
+[NotInParallel] // These tests are flaky when run in parallel
 public class IntegrationTests
 {
     [Before(Test)]
@@ -215,6 +216,48 @@ public class IntegrationTests
         );
 
         var afterFile = Path.Combine(Samples, "Hierarchy", "after-a.yml");
+
+        await Assert.That(code).IsEqualTo(0);
+        await Assert.That(beforeFile).IsTheSame(afterFile);
+    }
+
+    [Test]
+    public async Task Injection_ShouldWork_WithSimplePatternMatching()
+    {
+        var code = await InjectorApp.BootstrapAsync(
+            [Path.Combine(Samples, "Pattern", "a", "*.yml")],
+            [Path.Combine(Samples, "Pattern", "a", "*.json")],
+            true,
+            false,
+            "#{",
+            "}",
+            null,
+            LogLevel.Information
+        );
+
+        var beforeFile = Path.Combine(Samples, "Pattern", "a", "before.yml");
+        var afterFile = Path.Combine(Samples, "Pattern", "a", "after.yml");
+
+        await Assert.That(code).IsEqualTo(0);
+        await Assert.That(beforeFile).IsTheSame(afterFile);
+    }
+
+    [Test]
+    public async Task Injection_ShouldWork_WithAdvancedPatternMatching()
+    {
+        var code = await InjectorApp.BootstrapAsync(
+            [Path.Combine(Samples, "Pattern", "*.yml")],
+            [Path.Combine(Samples, "Pattern", "*.json")],
+            false,
+            false,
+            "#{",
+            "}",
+            null,
+            LogLevel.Information
+        );
+
+        var beforeFile = Path.Combine(Samples, "Pattern", "before.yml");
+        var afterFile = Path.Combine(Samples, "Pattern", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
         await Assert.That(beforeFile).IsTheSame(afterFile);

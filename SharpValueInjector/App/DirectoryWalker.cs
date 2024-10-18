@@ -8,7 +8,7 @@ public class DirectoryWalker(ILogger<DirectoryWalker> logger, ConsoleCancellatio
 {
     public async IAsyncEnumerable<string> WalkAsync(IReadOnlyCollection<(string directory, string pattern)> directoriesWithPatterns, bool recurseSubdirectories, bool ignoreCase)
     {
-        logger.LogDebug("Got directories to walk: {Directories}, recurse: {Recurse}", directoriesWithPatterns, recurseSubdirectories);
+        logger.LogDebug("Got directories to walk: {Directories}, recurse: {Recurse}, ignore case: {IgnoreCase}", directoriesWithPatterns, recurseSubdirectories, ignoreCase);
         
         var enumerationOptions = new EnumerationOptions
         {
