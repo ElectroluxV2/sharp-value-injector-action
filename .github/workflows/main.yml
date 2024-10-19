@@ -11,7 +11,8 @@ jobs:
   build-test-publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: "actions/checkout@v4"
+    - name: "Checkout"
+      uses: "actions/checkout@v4"
       with:
         clean: false
         sparse-checkout-cone-mode: true
@@ -19,3 +20,12 @@ jobs:
           action
         filter: tree:0
         fetch-depth: 0
+
+    - name: "Setup .NET"
+      uses: "actions/setup-dotnet@v4"
+      with:
+        dotnet-version: "9.x"
+
+    - name: "Build"
+      run: tree
+      shell: "bash"
