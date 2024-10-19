@@ -7,6 +7,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
 jobs:
   build-test-publish:
     runs-on: ubuntu-latest
@@ -27,6 +30,7 @@ jobs:
         dotnet-quality: "daily"
         dotnet-version: "9.x"
         cache: true
+        cache-dependency-path: action/SharpValueInjector.Tests/packages.lock.json
 
     - name: "Restore"
       run: dotnet restore --locked-mode SharpValueInjector.slnx
