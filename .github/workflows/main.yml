@@ -24,8 +24,13 @@ jobs:
     - name: "Setup .NET"
       uses: "actions/setup-dotnet@v4"
       with:
+        dotnet-quality: 'preview'
         dotnet-version: "9.x"
 
     - name: "Build"
-      run: tree
+      run: dotnet build --configuration Release --no-restore action
+      shell: "bash"
+
+    - name: "Test"
+      run: dotnet run action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj
       shell: "bash"
