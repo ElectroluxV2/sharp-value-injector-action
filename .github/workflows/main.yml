@@ -41,7 +41,7 @@ jobs:
       shell: "bash"
 
     - name: "Test"
-      run: dotnet run --project action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj
+      run: sudo dotnet run --project action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj
       shell: "bash"
 
     - name: "Publish"
