@@ -28,7 +28,7 @@ jobs:
         dotnet-version: "9.x"
 
     - name: "Build"
-      run: dotnet build --configuration Release --no-restore action
+      run: dotnet build --configuration Release --no-restore
       shell: "bash"
 
     - name: "Test"
