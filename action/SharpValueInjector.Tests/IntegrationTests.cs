@@ -29,6 +29,16 @@ public class IntegrationTests
     
     private static string Samples => TestContext.Current!.ObjectBag["Samples"] as string ?? throw new InvalidOperationException();
 
+    private static async Task AssertFileEquality(string first, string second)
+    {
+        if (await Task.WhenAll(File.ReadAllTextAsync(first), File.ReadAllTextAsync(second)) is not [var beforeLines, var afterLines])
+        {
+            throw new InvalidOperationException();
+        }
+
+        await Assert.That(beforeLines).IsEqualTo(afterLines);
+    }
+
     [Test]
     public async Task Injection_ShouldWork_WhenInputValueHasSimpleKey()
     {
@@ -47,7 +57,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Simple", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -68,7 +78,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Complex", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -89,7 +99,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Reference", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -110,7 +120,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Recursive", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -131,7 +141,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Numeric", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -152,7 +162,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Boolean", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -173,7 +183,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Conflict", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
 
@@ -199,7 +209,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Hierarchy", "after-c.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -224,7 +234,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Hierarchy", "after-a.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -245,7 +255,7 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Pattern", "a", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 
     [Test]
@@ -266,6 +276,6 @@ public class IntegrationTests
         var afterFile = Path.Combine(Samples, "Pattern", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await Assert.That(beforeFile).IsTheSame(afterFile);
+        await AssertFileEquality(beforeFile, afterFile);
     }
 }
