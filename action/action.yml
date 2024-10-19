@@ -11,11 +11,11 @@ inputs:
   recurse-subdirectories:
     description: "Weather to scan subdirectories of the given directories."
     required: false
-    default: true
+    default: "true"
   ignore-case:
     description: "Weather to ignore case when matching file name patterns."
     required: false
-    default: true
+    default: "true"
   opening-token:
     description: "The opening token for variable interpolation."
     required: false
@@ -32,23 +32,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set Greeting
-      run: echo "Hello $INPUT_WHO_TO_GREET."
-      shell: bash
-      env:
-        INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}
-
-    - name: Random Number Generator
-      id: random-number-generator
-      run: echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
-      shell: bash
-
-    - name: Set GitHub Path
-      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
-      shell: bash
-      env:
-        GITHUB_ACTION_PATH: ${{ github.action_path }}
-
-    - name: Run goodbye.sh
-      run: goodbye.sh
-      shell: bash
+  - name: "Sharp Value Injector"
+    # language=sh
+    run: |
+      dotnet run --project "${GITHUB_ACTION_PATH}/SharpValueInjector/SharpValueInjector.csproj"
+    shell: "bash"
+    env:
+      SVI_OUTPUT: ${{ inputs.output }}
+      SVI_INPUT: ${{ inputs.input }}
+      SVI_RECURSE_SUBDIRECTORIES: ${{ inputs.recurse-subdirectories }}
+      SVI_IGNORE_CASE: ${{ inputs.ignore-case }}
+      SVI_OPENING_TOKEN: ${{ inputs.opening-token }}
+      SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
+      SVI_LOG_LEVEL: ${{ inputs.log-level }}
