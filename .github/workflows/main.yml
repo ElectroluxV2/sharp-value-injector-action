@@ -28,7 +28,7 @@ jobs:
         dotnet-version: "9.x"
 
     - name: "Build"
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore SharpValueInjector.slnx
       shell: "bash"
 
     - name: "Test"
