@@ -24,8 +24,13 @@ jobs:
     - name: "Setup .NET"
       uses: "actions/setup-dotnet@v4"
       with:
-        dotnet-quality: 'preview'
+        dotnet-quality: "daily"
         dotnet-version: "9.x"
+        cache: true
+
+    - name: "Restore"
+      run: dotnet restore --locked-mode SharpValueInjector.slnx
+      shell: "bash"
 
     - name: "Build"
       run: dotnet build --configuration Release --no-restore SharpValueInjector.slnx
