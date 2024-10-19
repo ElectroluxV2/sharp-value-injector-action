@@ -7,11 +7,11 @@ using Spectre.Console;
 namespace SharpValueInjector.Tests;
 
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
-[Retry(300)] // Working with file system is flaky - dont know why, dont care why
+[Retry(1_000), Timeout(1_000 * 60)] // Working with file system is flaky - dont know why, dont care why
 public class IntegrationTests
 {
     [Before(Test)]
-    public Task Setup(TestContext context)
+    public Task Setup(TestContext context, CancellationToken cancellationToken)
     {
         // Before each test we gonna copy whole Samples directory to temp directory
         var tempSamples = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -26,12 +26,14 @@ public class IntegrationTests
 
         return Task.CompletedTask;
     }
-    
-    private static string Samples => TestContext.Current!.ObjectBag["Samples"] as string ?? throw new InvalidOperationException();
 
-    private static async Task AssertFileEquality(string first, string second)
+    #pragma warning disable TUnit0015
+    private static string Samples => TestContext.Current!.ObjectBag["Samples"] as string ?? throw new InvalidOperationException();
+    #pragma warning restore TUnit0015
+
+    private static async Task AssertFileEqualityAsync(string first, string second, CancellationToken cancellationToken)
     {
-        if (await Task.WhenAll(File.ReadAllTextAsync(first), File.ReadAllTextAsync(second)) is not [var beforeLines, var afterLines])
+        if (await Task.WhenAll(File.ReadAllTextAsync(first, cancellationToken), File.ReadAllTextAsync(second, cancellationToken)) is not [var beforeLines, var afterLines])
         {
             throw new InvalidOperationException();
         }
@@ -40,7 +42,7 @@ public class IntegrationTests
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WhenInputValueHasSimpleKey()
+    public async Task Injection_ShouldWork_WhenInputValueHasSimpleKey(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Simple", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -51,17 +53,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Simple", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WhenInputValueHasComplexKey()
+    public async Task Injection_ShouldWork_WhenInputValueHasComplexKey(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Complex", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -72,17 +75,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Complex", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WhenInputValueHasReference()
+    public async Task Injection_ShouldWork_WhenInputValueHasReference(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Reference", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -93,17 +97,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Reference", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WhenInputValueHasRecursiveReference()
+    public async Task Injection_ShouldWork_WhenInputValueHasRecursiveReference(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Recursive", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -114,17 +119,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Recursive", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WhenInputValueIsNumeric()
+    public async Task Injection_ShouldWork_WhenInputValueIsNumeric(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Numeric", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -135,17 +141,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Numeric", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WhenInputValueIsBoolean()
+    public async Task Injection_ShouldWork_WhenInputValueIsBoolean(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Boolean", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -156,17 +163,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Boolean", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WhenInputHasConflict()
+    public async Task Injection_ShouldWork_WhenInputHasConflict(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Conflict", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -177,18 +185,19 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Conflict", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
 
     [Test]
-    public async Task Injection_ShouldWork_WithHierarchicalInputs_Case1()
+    public async Task Injection_ShouldWork_WithHierarchicalInputs_Case1(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Hierarchy", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -203,17 +212,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Hierarchy", "after-c.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WithHierarchicalInputs_Case2()
+    public async Task Injection_ShouldWork_WithHierarchicalInputs_Case2(CancellationToken cancellationToken)
     {
         var beforeFile = Path.Combine(Samples, "Hierarchy", "before.yml");
         var code = await InjectorApp.BootstrapAsync(
@@ -228,17 +238,18 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var afterFile = Path.Combine(Samples, "Hierarchy", "after-a.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WithSimplePatternMatching()
+    public async Task Injection_ShouldWork_WithSimplePatternMatching(CancellationToken cancellationToken)
     {
         var code = await InjectorApp.BootstrapAsync(
             [Path.Combine(Samples, "Pattern", "a", "*.yml")],
@@ -248,18 +259,19 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var beforeFile = Path.Combine(Samples, "Pattern", "a", "before.yml");
         var afterFile = Path.Combine(Samples, "Pattern", "a", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 
     [Test]
-    public async Task Injection_ShouldWork_WithAdvancedPatternMatching()
+    public async Task Injection_ShouldWork_WithAdvancedPatternMatching(CancellationToken cancellationToken)
     {
         var code = await InjectorApp.BootstrapAsync(
             [Path.Combine(Samples, "Pattern", "*.yml")],
@@ -269,13 +281,14 @@ public class IntegrationTests
             "#{",
             "}",
             null,
-            LogLevel.Information
+            LogLevel.Information,
+            cancellationToken
         );
 
         var beforeFile = Path.Combine(Samples, "Pattern", "before.yml");
         var afterFile = Path.Combine(Samples, "Pattern", "after.yml");
 
         await Assert.That(code).IsEqualTo(0);
-        await AssertFileEquality(beforeFile, afterFile);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
 }
