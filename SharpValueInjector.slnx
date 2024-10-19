@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Folder Name="/GHA/">
+    <File Path="action\action.yml" />
+  </Folder>
+  <Project Path="action\SharpValueInjector.Tests\SharpValueInjector.Tests.csproj" />
+  <Project Path="action\SharpValueInjector\SharpValueInjector.csproj" />
+</Solution>

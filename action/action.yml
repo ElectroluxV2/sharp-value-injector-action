@@ -1,0 +1,54 @@
+name: "Sharp Value Injector"
+description: |
+  Reads given inputs for variables to substitute for in given output files.
+inputs:
+  output:
+    description: "Files to inject values into or directories to scan (may contain file name patterns such as '/sample/path/*.yaml'.). To specify multiple outputs, separate them with ';'."
+    required: true
+  input:
+    description: "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain values to inject into target files. To specify multiple files, separate them with ';'. Order matters when resolving conflicts."
+    required: true
+  recurse-subdirectories:
+    description: "Weather to scan subdirectories of the given directories."
+    required: false
+    default: true
+  ignore-case:
+    description: "Weather to ignore case when matching file name patterns."
+    required: false
+    default: true
+  opening-token:
+    description: "The opening token for variable interpolation."
+    required: false
+    default: "#{"
+  closing-token:
+    description: "The closing token for variable interpolation."
+    required: false
+    default: "}"
+  log-level:
+    description: "The minimum level of logs to output."
+    required: false
+    default: "Information"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Greeting
+      run: echo "Hello $INPUT_WHO_TO_GREET."
+      shell: bash
+      env:
+        INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}
+
+    - name: Random Number Generator
+      id: random-number-generator
+      run: echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Set GitHub Path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
+    - name: Run goodbye.sh
+      run: goodbye.sh
+      shell: bash
