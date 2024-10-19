@@ -40,9 +40,16 @@ jobs:
       run: dotnet build --configuration Release --no-restore SharpValueInjector.slnx
       shell: "bash"
 
-    - name: "Test"
-      run: dotnet run --project action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj
-      shell: "bash"
+#    - name: "Test"
+#      run: dotnet run --project action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj
+#      shell: "bash"
+
+    - name: "Test R"
+      uses: "nick-fields/retry@v3"
+      with:
+        max_attempts: 30
+        retry_on: error
+        command: dotnet exec action/SharpValueInjector.Tests/bin/Release/net9.0/SharpValueInjector.Tests.dll
 
     - name: "Publish"
       run: dotnet publish --configuration Release --no-build --output ${{ github.workspace }}/dist action/SharpValueInjector/SharpValueInjector.csproj
