@@ -41,5 +41,9 @@ jobs:
       shell: "bash"
 
     - name: "Test"
-      run: dotnet run action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj
+      run: dotnet run --project action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj
+      shell: "bash"
+
+    - name: "Publish"
+      run: dotnet publish --configuration Release --no-build --output ${{ github.workspace }}/dist action/SharpValueInjector/SharpValueInjector.csproj
       shell: "bash"
