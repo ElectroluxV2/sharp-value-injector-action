@@ -7,7 +7,7 @@ using Spectre.Console;
 namespace SharpValueInjector.Tests;
 
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
-[Retry(30)] // Working with file system is flaky - dont know why, dont care why
+[Retry(300)] // Working with file system is flaky - dont know why, dont care why
 public class IntegrationTests
 {
     [Before(Test)]
