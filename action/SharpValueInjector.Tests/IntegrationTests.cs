@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic.FileIO;
 using SharpValueInjector.App;
+using Spectre.Console;
 
 namespace SharpValueInjector.Tests;
 
@@ -14,7 +15,12 @@ public class IntegrationTests
     {
         // Before each test we gonna copy whole Samples directory to temp directory
         var tempSamples = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        FileSystem.CopyDirectory("Samples", tempSamples, true);
+        try {
+            FileSystem.CopyDirectory(Path.Combine(AppContext.BaseDirectory, "Samples"), tempSamples, true);
+        } catch (Exception e) {
+            AnsiConsole.WriteException(e);
+            throw;
+        }
         
         context.ObjectBag["Samples"] = tempSamples; 
 
