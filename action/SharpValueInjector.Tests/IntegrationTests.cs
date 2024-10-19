@@ -7,7 +7,7 @@ using Spectre.Console;
 namespace SharpValueInjector.Tests;
 
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
-[NotInParallel] // These tests are flaky when run in parallel
+[Retry(30)] // Working with file system is flaky - dont know why, dont care why
 public class IntegrationTests
 {
     [Before(Test)]

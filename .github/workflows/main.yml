@@ -41,12 +41,8 @@ jobs:
       shell: "bash"
 
     - name: "Test"
-      uses: "nick-fields/retry@v3"
-      with:
-        timeout_minutes: 2
-        max_attempts: 300
-        retry_on: error
-        command: dotnet exec action/SharpValueInjector.Tests/bin/Release/net9.0/SharpValueInjector.Tests.dll
+      run: dotnet exec action/SharpValueInjector.Tests/bin/Release/net9.0/SharpValueInjector.Tests.dll
+      shell: "bash"
 
     - name: "Publish"
       run: dotnet publish --configuration Release --no-build --output ${{ github.workspace }}/dist action/SharpValueInjector/SharpValueInjector.csproj
