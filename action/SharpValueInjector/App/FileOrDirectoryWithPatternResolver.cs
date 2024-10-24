@@ -5,27 +5,30 @@ namespace SharpValueInjector.App;
 
 public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatternResolver> logger)
 {
-    public (string[] Files, (string Directory, string Pattern)[] DirectoriesWithPattern) SplitAndValidate(string[] filesOrDirectoriesWithPattern)
+    public (string[] Files, (string Directory, string Pattern)[] DirectoriesWithPattern, string[] Links) SplitAndValidate(string[] filesOrDirectoriesWithPattern)
     {
+        var groupedByLinks = filesOrDirectoriesWithPattern
+            .GroupBy(x => x.Contains("https://"))
+            .ToImmutableDictionary(x => x.Key, x => x.ToArray());
+
         // Group paths into ones with pattern and paths without pattern
-        var grouped = filesOrDirectoriesWithPattern
+        var groupedByPattern = (groupedByLinks.GetValueOrDefault(false) ?? [])
             .GroupBy(x => x.Contains('*'))
             .ToImmutableDictionary(x => x.Key, x => x.ToArray());
 
-        var files = grouped.GetValueOrDefault(false) ?? [];
-        var directoriesWithPattern = grouped.GetValueOrDefault(true) ?? [];
-        
+        var files = groupedByPattern.GetValueOrDefault(false) ?? [];
         // Paths without pattern are supposed to be existing files
         foreach (var file in files)
         {
             logger.LogDebug("Validating that file {File} exists", file);
-            
+
             if (!File.Exists(file))
             {
-                throw new FileNotFoundException("File does not exist", file);
+                throw new FileNotFoundException($"File does not exist: {file}", file);
             }
         }
 
+        var directoriesWithPattern = groupedByPattern.GetValueOrDefault(true) ?? [];
         var directoriesAndPatterns = directoriesWithPattern.Select(pathWithPattern =>
         {
             var lastSeparatorIndex = pathWithPattern.LastIndexOf(Path.DirectorySeparatorChar);
@@ -43,6 +46,6 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             }
         }
         
-        return (files, directoriesAndPatterns);
+        return (files, directoriesAndPatterns, groupedByLinks.GetValueOrDefault(true) ?? []);
     }
 }

@@ -46,7 +46,10 @@ public class InjectorApp(
 
     private async Task<int> RunAsync()
     {
-        var (inputFilesFromConfiguration, inputDirectoriesAndPatterns) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.InputFiles);
+        var (inputFilesFromConfiguration, inputDirectoriesAndPatterns, inputFileLinks) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.InputFiles);
+
+        logger.LogCritical("Links: {InputLinks}", inputFileLinks);
+
         var inputFiles = await directoryWalker
             .WalkAsync(inputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
             .Concat(inputFilesFromConfiguration.ToAsyncEnumerable())
@@ -65,7 +68,7 @@ public class InjectorApp(
             logger.LogInformation("Resolved key {Key} with value {Value}", key, value);
         }
 
-        var (outputFilesFromConfiguration, outputDirectoriesAndPatterns) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);
+        var (outputFilesFromConfiguration, outputDirectoriesAndPatterns, _) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);
         var outputFiles = directoryWalker
             .WalkAsync(outputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
             .Concat(outputFilesFromConfiguration.ToAsyncEnumerable());
