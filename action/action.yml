@@ -32,6 +32,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+  # TODO: Create prod version of this action that will run compiled binary instead of source code.
+  - name: "Install .NET 9-prev.2"
+    uses: "actions/setup-dotnet@v4"
+    with:
+      dotnet-quality: "daily"
+      dotnet-version: "9.0.2xx"
+
   - name: "Sharp Value Injector"
     # language=sh
     run: |
