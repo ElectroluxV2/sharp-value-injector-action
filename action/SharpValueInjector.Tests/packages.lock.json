@@ -10,9 +10,9 @@
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[9.0.0-rc.2.24473.5, )",
-        "resolved": "9.0.0-rc.2.24473.5",
-        "contentHash": "mXyCgKqBIo/KOpY09FqjOU8d+LME2qowzzvBd1/viYmSpAKYfQ2w1WDOlh0FniY4xnrB/wmDiAo4frJvfCqT0w=="
+        "requested": "[9.0.0-rc.1.24431.7, )",
+        "resolved": "9.0.0-rc.1.24431.7",
+        "contentHash": "B8jHIIszeUdDY+O4G1/xPOuhrriwsv9Z8/u3XSOAqc8Z0mQCeLBKg2oLGElDZeRF8wWXDGklAKY3f0IHopyXkQ=="
       },
       "TUnit": {
         "type": "Direct",
@@ -23,6 +23,11 @@
           "TUnit.Assertions": "0.1.897",
           "TUnit.Engine": "0.1.897"
         }
+      },
+      "CommunityToolkit.HighPerformance": {
+        "type": "Transitive",
+        "resolved": "8.3.2",
+        "contentHash": "1Os81ua0FmIOtiSgOk5C1KBraQ3SDfxs/7BG4qDagm48nGplr//lAVqLH9I2TLDVqRFdhqTUaEITFA5Ho/Ovkw=="
       },
       "EnumerableAsyncProcessor": {
         "type": "Transitive",
@@ -205,6 +210,19 @@
           "Microsoft.Extensions.Diagnostics.Abstractions": "9.0.0-rc.2.24473.5",
           "Microsoft.Extensions.FileProviders.Abstractions": "9.0.0-rc.2.24473.5",
           "Microsoft.Extensions.Logging.Abstractions": "9.0.0-rc.2.24473.5"
+        }
+      },
+      "Microsoft.Extensions.Http": {
+        "type": "Transitive",
+        "resolved": "9.0.0-rc.2.24473.5",
+        "contentHash": "keBCwetARoeWWyUkjFaRNhhdxILmpoVPck2dympki/VH3pMsOSJjCl4MEcbR/uwcvSgEW+j2lHst7mGyYr2jPA==",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "9.0.0-rc.2.24473.5",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0-rc.2.24473.5",
+          "Microsoft.Extensions.Diagnostics": "9.0.0-rc.2.24473.5",
+          "Microsoft.Extensions.Logging": "9.0.0-rc.2.24473.5",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.0-rc.2.24473.5",
+          "Microsoft.Extensions.Options": "9.0.0-rc.2.24473.5"
         }
       },
       "Microsoft.Extensions.Logging": {
@@ -423,8 +441,10 @@
       "sharpvalueinjector": {
         "type": "Project",
         "dependencies": {
+          "CommunityToolkit.HighPerformance": "[8.3.2, )",
           "Microsoft.Extensions.DependencyInjection": "[9.0.0-rc.2.24473.5, )",
           "Microsoft.Extensions.Hosting": "[9.0.0-rc.2.24473.5, )",
+          "Microsoft.Extensions.Http": "[9.0.0-rc.2.24473.5, )",
           "Microsoft.Extensions.Logging": "[9.0.0-rc.2.24473.5, )",
           "Serilog": "[4.0.2, )",
           "Serilog.Extensions.Hosting": "[8.0.0, )",
