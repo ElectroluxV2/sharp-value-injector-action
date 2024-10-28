@@ -8,17 +8,19 @@ namespace SharpValueInjector.App;
 
 public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolver> logger, JsonSlurp jsonSlurp)
 {
-    public async Task<FrozenDictionary<string, string>> MakeFromInputFilesAsync(IReadOnlyCollection<string> inputFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
+    public async Task<FrozenDictionary<string, string>> MakeFromInputFilesAsync(IReadOnlyCollection<Stream> inputFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {
         // This will contain all injectable values (both plain values & AWS SM ARNs)
         var conflictlessInjections = new Dictionary<string, string>();
         foreach (var inputFile in inputFiles)
         {
             logger.LogInformation("Reading input file {InputFile}", inputFile);
+
+            // PERF: Investigate stackalloc byte buffer for remote files
+            var memoryStream = new MemoryStream();
+            await inputFile.CopyToAsync(memoryStream, cancellationToken);
             
-            var json = await File.ReadAllBytesAsync(inputFile, cancellationToken);
-            
-            var flattened = jsonSlurp.Flatten(json);
+            var flattened = jsonSlurp.Flatten(memoryStream.ToArray());
             
             foreach (var (key, value) in flattened)
             {

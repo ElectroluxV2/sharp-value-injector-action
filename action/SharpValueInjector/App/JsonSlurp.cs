@@ -12,7 +12,8 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
     public FrozenDictionary<string, string> Flatten(ReadOnlySpan<byte> json)
     {
         logger.LogDebug("Parsing JSON size: {JsonSize}", Utils.BytesToString(json.Length));
-        
+
+        // PERF: Use stream reader instead of span
         var reader = new Utf8JsonReader(json, new()
         {
             AllowTrailingCommas = true,
