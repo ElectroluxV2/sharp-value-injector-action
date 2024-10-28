@@ -5,11 +5,26 @@ namespace SharpValueInjector.App;
 
 public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatternResolver> logger)
 {
-    public (string[] Files, (string Directory, string Pattern)[] DirectoriesWithPattern, string[] Links) SplitAndValidate(string[] filesOrDirectoriesWithPattern)
+    public (string[] Files, (string Directory, string Pattern)[] DirectoriesWithPattern, Uri[] Links) SplitAndValidate(string[] filesOrDirectoriesWithPattern)
     {
         var groupedByLinks = filesOrDirectoriesWithPattern
             .GroupBy(x => x.Contains("https://"))
             .ToImmutableDictionary(x => x.Key, x => x.ToArray());
+
+        // Validate that links are correct Urls
+        var links = (groupedByLinks.GetValueOrDefault(true) ?? [])
+            .Select(link =>
+            {
+                logger.LogDebug("Validating that link {Link} is a correct URL", link);
+
+                if (!Uri.TryCreate(link, UriKind.Absolute, out var uri))
+                {
+                    throw new ArgumentException($"Link is not a correct URL: {link}");
+                }
+
+                return uri;
+            })
+            .ToArray();
 
         // Group paths into ones with pattern and paths without pattern
         var groupedByPattern = (groupedByLinks.GetValueOrDefault(false) ?? [])
@@ -32,8 +47,7 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
         var directoriesAndPatterns = directoriesWithPattern.Select(pathWithPattern =>
         {
             var lastSeparatorIndex = pathWithPattern.LastIndexOf(Path.DirectorySeparatorChar);
-            return (Directory: pathWithPattern[..lastSeparatorIndex],
-                Pattern: pathWithPattern[(lastSeparatorIndex + 1)..]);
+            return (Directory: pathWithPattern[..lastSeparatorIndex], Pattern: pathWithPattern[(lastSeparatorIndex + 1)..]);
         }).ToArray();
         
         foreach (var (directory, _) in directoriesAndPatterns)
@@ -46,6 +60,6 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             }
         }
         
-        return (files, directoriesAndPatterns, groupedByLinks.GetValueOrDefault(true) ?? []);
+        return (files, directoriesAndPatterns, links);
     }
 }

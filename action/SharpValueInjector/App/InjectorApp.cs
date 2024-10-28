@@ -14,12 +14,13 @@ public class InjectorApp(
     DirectoryWalker directoryWalker,
     HierarchicalInjectionsResolver hierarchicalInjectionsResolver,
     FileInjector fileInjector,
+    FileFetcher fileFetcher,
     ConsoleCancellationToken consoleCancellationToken
 )
 {
-    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string? awsSmToken, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string? awsSmToken, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
-        var serviceProvider = new ServiceCollection()
+        return new ServiceCollection()
             .AddSingleton(new ConsoleCancellationToken(cancellationToken))
             .AddSingleton(new SharpValueInjectionConfiguration(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, awsSmToken))
             .AddLogging()
@@ -33,14 +34,21 @@ public class InjectorApp(
                     theme: SystemConsoleTheme.Literate
                 );
             })
+            .AddHttpClient()
             .AddSingleton<InjectorApp>()
             .AddTransient<JsonSlurp>()
             .AddTransient<FileInjector>()
             .AddTransient<HierarchicalInjectionsResolver>()
             .AddTransient<DirectoryWalker>()
             .AddTransient<FileOrDirectoryWithPatternResolver>()
+            .AddTransient<UriMapper>()
+            .AddTransient<FileFetcher>()
             .BuildServiceProvider();
+    }
 
+    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string? awsSmToken, LogLevel logLevel, CancellationToken cancellationToken = default)
+    {
+        var serviceProvider = BuildServiceProvider(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, awsSmToken, logLevel, cancellationToken);
         return await serviceProvider.GetRequiredService<InjectorApp>().RunAsync();
     }
 
@@ -48,14 +56,16 @@ public class InjectorApp(
     {
         var (inputFilesFromConfiguration, inputDirectoriesAndPatterns, inputFileLinks) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.InputFiles);
 
-        logger.LogCritical("Links: {InputLinks}", inputFileLinks);
+        var remoteInputFiles = fileFetcher.FetchFilesAsync(inputFileLinks, consoleCancellationToken);
 
         var inputFiles = await directoryWalker
             .WalkAsync(inputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
             .Concat(inputFilesFromConfiguration.ToAsyncEnumerable())
+            .Select(File.OpenRead)
+            .Concat(remoteInputFiles)
             .ToListAsync();
 
-        logger.LogInformation("Input files: {InputFiles}", inputFiles);
+        logger.LogInformation("Input files count: {InputFilesCount}", inputFiles.Count);
 
         // This will contain all injectable values (both plain values & AWS SM ARNs)
         // TODO: Implement ARN resolution
