@@ -20,7 +20,7 @@ jobs:
         clean: false
         sparse-checkout-cone-mode: true
         sparse-checkout: |
-          action
+          src
         filter: tree:0
         fetch-depth: 0
 
@@ -30,7 +30,7 @@ jobs:
         dotnet-quality: "daily"
         dotnet-version: "9.0.2xx"
         cache: true
-        cache-dependency-path: action/SharpValueInjector.Tests/packages.lock.json
+        cache-dependency-path: src/SharpValueInjector.Tests/packages.lock.json
 
     - name: "Restore"
       run: dotnet restore --locked-mode SharpValueInjector.slnx
@@ -41,9 +41,9 @@ jobs:
       shell: "bash"
 
     - name: "Test"
-      run: dotnet exec action/SharpValueInjector.Tests/bin/Release/net9.0/SharpValueInjector.Tests.dll
+      run: dotnet exec src/SharpValueInjector.Tests/bin/Release/net9.0/SharpValueInjector.Tests.dll
       shell: "bash"
 
     - name: "Publish"
-      run: dotnet publish --configuration Release --no-build --output ${{ github.workspace }}/dist action/SharpValueInjector/SharpValueInjector.csproj
+      run: dotnet publish --configuration Release --no-build --output ${{ github.workspace }}/dist src/SharpValueInjector/SharpValueInjector.csproj
       shell: "bash"
