@@ -1,8 +1,8 @@
 ﻿<Solution>
   <Folder Name="/GHA/">
-    <File Path="action/action.yml" />
+    <File Path="action.yml" />
     <File Path=".github/workflows/main.yml" />
   </Folder>
-  <Project Path="action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj" />
-  <Project Path="action/SharpValueInjector/SharpValueInjector.csproj" />
+  <Project Path="SharpValueInjector.Tests/SharpValueInjector.Tests.csproj" />
+  <Project Path="SharpValueInjector/SharpValueInjector.csproj" />
 </Solution>
