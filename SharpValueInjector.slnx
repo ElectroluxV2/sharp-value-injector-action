@@ -3,6 +3,6 @@
     <File Path="action.yml" />
     <File Path=".github/workflows/main.yml" />
   </Folder>
-  <Project Path="src/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj" />
-  <Project Path="src/SharpValueInjector/SharpValueInjector.csproj" />
+  <Project Path="SharpValueInjector.Tests/SharpValueInjector.Tests.csproj" />
+  <Project Path="SharpValueInjector/SharpValueInjector.csproj" />
 </Solution>

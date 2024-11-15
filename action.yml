@@ -42,7 +42,7 @@ runs:
   - name: "Sharp Value Injector"
     # language=sh
     run: |
-      dotnet run --project "${GITHUB_ACTION_PATH}/src/SharpValueInjector/SharpValueInjector.csproj"
+      dotnet run --project "${GITHUB_ACTION_PATH}/SharpValueInjector/SharpValueInjector.csproj"
     shell: "bash"
     env:
       SVI_OUTPUT: ${{ inputs.output }}
