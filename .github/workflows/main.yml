@@ -33,7 +33,7 @@ jobs:
         cache-dependency-path: action/SharpValueInjector.Tests/packages.lock.json
 
     - name: "Restore"
-      run: dotnet restore --force-evaluate --locked-mode SharpValueInjector.slnx # FIXME: --force-evaluate should not be required
+      run: dotnet restore --locked-mode SharpValueInjector.slnx
       shell: "bash"
 
     - name: "Build"
