@@ -44,9 +44,10 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             var p = actionRef.Split("/");
             var b = actionRef.Substring(actionRef.IndexOf('@') + 1);
 
+
             for (var i = 2; i < p.Length; i++)
             {
-                b += p[i];
+                b = Path.Combine(b, p[i]);
             }
 
             return Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "_actions", p[0], p[1], b, filePath);
