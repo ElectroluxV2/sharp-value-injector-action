@@ -42,7 +42,7 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             var (actionRef, filePath) = CompositeActionFetcher.SplitFetchActionLocator(x);
 
             var p = actionRef.Split("/");
-            var b = actionRef.Substring(actionRef.IndexOf('@') + 1, actionRef.IndexOf('$'));
+            var b = actionRef.Substring(actionRef.IndexOf('@') + 1);
 
             for (var i = 2; i < p.Length; i++)
             {

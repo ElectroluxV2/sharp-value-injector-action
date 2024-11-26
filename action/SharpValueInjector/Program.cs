@@ -93,4 +93,4 @@ bool? BoolFromEnv(string variable)
     return value is not null ? bool.Parse(value) : null;
 }
 
-string[] ArrayFromEnv(string variable) => Environment.GetEnvironmentVariable(variable)?.Split(";").Select(x => x.Trim()).ToArray() ?? [];
+string[] ArrayFromEnv(string variable) => Environment.GetEnvironmentVariable(variable)?.ReplaceLineEndings(string.Empty).Split(";").Select(x => x.Trim()).ToArray() ?? [];
