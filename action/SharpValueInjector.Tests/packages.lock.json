@@ -24,6 +24,19 @@
           "TUnit.Engine": "0.1.897"
         }
       },
+      "AWSSDK.Core": {
+        "type": "Transitive",
+        "resolved": "3.7.400.53",
+        "contentHash": "OwJTHfD3tXKLPiB/UUr6SSigFycQm6JNTReh5j2kYJP0CgcZmV+qeePEpIptxCVbq28esef/8hdzezkzNhN+fA=="
+      },
+      "AWSSDK.SecretsManager": {
+        "type": "Transitive",
+        "resolved": "3.7.400.53",
+        "contentHash": "oClno3UGqNUspp/vVOF6Brj792FRZepwAtks1MhiXowMODOyW6pqZMuoe6Zmhoxvp5zcJ/apAbbJGV2gWfnqSg==",
+        "dependencies": {
+          "AWSSDK.Core": "[3.7.400.53, 4.0.0)"
+        }
+      },
       "CommunityToolkit.HighPerformance": {
         "type": "Transitive",
         "resolved": "8.4.0-preview2",
@@ -441,6 +454,7 @@
       "sharpvalueinjector": {
         "type": "Project",
         "dependencies": {
+          "AWSSDK.SecretsManager": "[3.7.400.53, )",
           "CommunityToolkit.HighPerformance": "[8.4.0-preview2, )",
           "Microsoft.DotNet.ILCompiler": "[9.0.0, )",
           "Microsoft.Extensions.DependencyInjection": "[9.0.0, )",

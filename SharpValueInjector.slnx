@@ -5,4 +5,5 @@
   </Folder>
   <Project Path="action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj" />
   <Project Path="action/SharpValueInjector/SharpValueInjector.csproj" />
+  <Project Path="GitHubActionFetcher\GitHubActionFetcher.csproj" Type="Classic C#" />
 </Solution>

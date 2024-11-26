@@ -2,6 +2,15 @@
   "version": 1,
   "dependencies": {
     "net9.0": {
+      "AWSSDK.SecretsManager": {
+        "type": "Direct",
+        "requested": "[3.7.400.53, )",
+        "resolved": "3.7.400.53",
+        "contentHash": "oClno3UGqNUspp/vVOF6Brj792FRZepwAtks1MhiXowMODOyW6pqZMuoe6Zmhoxvp5zcJ/apAbbJGV2gWfnqSg==",
+        "dependencies": {
+          "AWSSDK.Core": "[3.7.400.53, 4.0.0)"
+        }
+      },
       "CommunityToolkit.HighPerformance": {
         "type": "Direct",
         "requested": "[8.4.0-preview2, )",
@@ -151,6 +160,11 @@
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
         }
+      },
+      "AWSSDK.Core": {
+        "type": "Transitive",
+        "resolved": "3.7.400.53",
+        "contentHash": "OwJTHfD3tXKLPiB/UUr6SSigFycQm6JNTReh5j2kYJP0CgcZmV+qeePEpIptxCVbq28esef/8hdzezkzNhN+fA=="
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",

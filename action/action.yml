@@ -33,47 +33,25 @@ runs:
   using: "composite"
   steps:
   # TODO: Create prod version of this action that will run compiled binary instead of source code.
-  - name: "Install .NET 9-prev.2"
-    uses: "actions/setup-dotnet@v4"
-    with:
-      dotnet-quality: "daily"
-      dotnet-version: "9.0.2xx"
-
-  - name: Setup
-    shell: bash
+  - name: "Composite Action Fetcher"
+    shell: bash # language=sh
     run: |
-      mkdir -p ./.tmp-dynamic-uses &&
-      cat <<'DYNAMIC_USES_EOF' >./.tmp-dynamic-uses/action.yml
-      runs:
-        using: composite
-        steps:
-        - run: rm -rf ./.tmp-dynamic-uses
-          shell: sh
+      dotnet run --project "${GITHUB_ACTION_PATH}/GitHubActionFetcher/GitHubActionFetcher.csproj"
+    env:
+      SVI_INPUT: ${{ inputs.input }}
+    if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
-        - name: "Download cross-repo files 1"
-          uses: "market-intelligence/connect-foundation-mateusz-budzisz/.cicd/compiled@main"
-          if: ${{ '$' }}{{ false }}
-    
-        - name: "Download cross-repo files 2"
-          uses: "market-intelligence/connect-foundation/.cicd/compiled@main"
-          if: ${{ '$' }}{{ false }}
-      DYNAMIC_USES_EOF
-  - name: Run
-    id: run
-    uses: ./.tmp-dynamic-uses
-
-
-
-#  - name: "Sharp Value Injector"
-#    # language=sh
-#    run: |
-#      dotnet run --project "${GITHUB_ACTION_PATH}/SharpValueInjector/SharpValueInjector.csproj"
-#    shell: "bash"
-#    env:
-#      SVI_OUTPUT: ${{ inputs.output }}
-#      SVI_INPUT: ${{ inputs.input }}
-#      SVI_RECURSE_SUBDIRECTORIES: ${{ inputs.recurse-subdirectories }}
-#      SVI_IGNORE_CASE: ${{ inputs.ignore-case }}
-#      SVI_OPENING_TOKEN: ${{ inputs.opening-token }}
-#      SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
-#      SVI_LOG_LEVEL: ${{ inputs.log-level }}
+  - name: "Sharp Value Injector"
+    # language=sh
+    run: |
+      dotnet run --project "${GITHUB_ACTION_PATH}/SharpValueInjector/SharpValueInjector.csproj"
+    shell: "bash"
+    env:
+      SVI_OUTPUT: ${{ inputs.output }}
+      SVI_INPUT: ${{ inputs.input }}
+      SVI_RECURSE_SUBDIRECTORIES: ${{ inputs.recurse-subdirectories }}
+      SVI_IGNORE_CASE: ${{ inputs.ignore-case }}
+      SVI_OPENING_TOKEN: ${{ inputs.opening-token }}
+      SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
+      SVI_LOG_LEVEL: ${{ inputs.log-level }}
+      SVI_GITHUB_WORKSPACE: ${{ github.workspace }}
