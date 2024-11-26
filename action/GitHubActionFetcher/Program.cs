@@ -21,6 +21,7 @@ if (string.IsNullOrEmpty(githubWorkspace))
 }
 
 var inputFilesWithCompositeAction = inputFiles
+    .ReplaceLineEndings(string.Empty)
     .Split(';')
     .Where(x => x.Contains('$'))
     .Select(CompositeActionFetcher.SplitFetchActionLocator);
