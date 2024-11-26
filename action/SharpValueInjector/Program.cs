@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SharpValueInjector.App;
 using Spectre.Console;
-using static SharpValueInjector.Shared.ConsoleLifetimeUtils;
+using static Shared.ConsoleLifetimeUtils;
 
 var outputFilesArgument = new Argument<string[]>(
     "output",

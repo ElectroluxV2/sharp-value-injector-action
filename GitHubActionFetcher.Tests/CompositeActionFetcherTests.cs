@@ -1,9 +1,9 @@
 // Copyright (C) IHS Markit. All Rights Reserved.
 // NOTICE: All information contained herein is, and remains the property of IHS Markit and its suppliers, if any. The intellectual and technical concepts contained herein are proprietary to IHS Markit and its suppliers and may be covered by U.S. and Foreign Patents, patents in process, and are protected by trade secret or copyright law. Dissemination of this information or reproduction of this material is strictly forbidden unless prior written permission is obtained from IHS Markit.
 
-using SharpValueInjector.App;
+using SharpValueInjector.Tests;
 
-namespace SharpValueInjector.Tests;
+namespace GitHubActionFetcher.Tests;
 
 public class CompositeActionFetcherTests
 {
@@ -36,7 +36,7 @@ public class CompositeActionFetcherTests
     [Test]
     public async Task ActionRefsToCompoundComppsteFetchActionShouldWork()
     {
-        var compositeAction = CompositeActionFetcher.ActionRefsToCompoundCompositeFetchAction(
+        var compositeAction = CompositeActionFetcher.ActionRefsToCompoundCompositeFetchActionYaml(
             ("market-intelligence/connect-foundation-1/.cicd/compiled@main", "variables/connect-foundation-1.variables.p1.json"),
             ("market-intelligence/connect-foundation-2/.cicd/compiled@main", "variables/connect-foundation-2.variables.p2.json")
         );

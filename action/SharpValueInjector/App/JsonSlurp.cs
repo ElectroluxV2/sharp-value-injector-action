@@ -2,7 +2,7 @@ using System.Collections.Frozen;
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using SharpValueInjector.Shared;
+using Shared;
 
 namespace SharpValueInjector.App;
 

@@ -18,13 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpValueInjector\SharpValueInjector.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Samples\**\*.*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

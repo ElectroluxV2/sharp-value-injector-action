@@ -39,6 +39,7 @@ runs:
       dotnet run --project "${GITHUB_ACTION_PATH}/GitHubActionFetcher/GitHubActionFetcher.csproj"
     env:
       SVI_INPUT: ${{ inputs.input }}
+      GITHUB_WORKSPACE: ${{ github.workspace }}
     if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Sharp Value Injector"
@@ -54,4 +55,4 @@ runs:
       SVI_OPENING_TOKEN: ${{ inputs.opening-token }}
       SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
       SVI_LOG_LEVEL: ${{ inputs.log-level }}
-      SVI_GITHUB_WORKSPACE: ${{ github.workspace }}
+      GITHUB_WORKSPACE: ${{ github.workspace }}
