@@ -41,9 +41,11 @@ runs:
 
   - name: "Download cross-repo files 1"
     uses: "market-intelligence/connect-foundation-mateusz-budzisz/.cicd/compiled@main"
+    if: ${{ false }}
 
   - name: "Download cross-repo files 2"
     uses: "market-intelligence/connect-foundation/.cicd/compiled@main"
+    if: ${{ false }}
 
 #  - name: "Sharp Value Injector"
 #    # language=sh
