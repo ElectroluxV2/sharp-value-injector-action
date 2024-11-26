@@ -33,13 +33,17 @@ runs:
   using: "composite"
   steps:
   # TODO: Create prod version of this action that will run compiled binary instead of source code.
-  - name: "Composite Action Fetcher"
+  - name: "Compose GitHub Action Fetcher"
     shell: bash # language=sh
     run: |
       dotnet run --project "${GITHUB_ACTION_PATH}/GitHubActionFetcher/GitHubActionFetcher.csproj"
     env:
       SVI_INPUT: ${{ inputs.input }}
       GITHUB_WORKSPACE: ${{ github.workspace }}
+    if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
+
+  - name: "Fetch files using Composed GitHub Action"
+    uses: "fetch-files.yml"
     if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Sharp Value Injector"
