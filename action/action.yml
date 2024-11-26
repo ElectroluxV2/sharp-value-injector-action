@@ -43,7 +43,7 @@ runs:
     if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Fetch files using Composed GitHub Action"
-    uses: "fetch-files.yml"
+    uses: "./fetch-files.yml"
     if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Sharp Value Injector"
