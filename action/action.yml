@@ -39,13 +39,30 @@ runs:
       dotnet-quality: "daily"
       dotnet-version: "9.0.2xx"
 
-  - name: "Download cross-repo files 1"
-    uses: "market-intelligence/connect-foundation-mateusz-budzisz/.cicd/compiled@main"
-    if: ${{ false }}
+  - name: Setup
+    shell: bash
+    run: |
+      mkdir -p ./.tmp-dynamic-uses &&
+      cat <<'DYNAMIC_USES_EOF' >./.tmp-dynamic-uses/action.yml
+      runs:
+        using: composite
+        steps:
+        - run: rm -rf ./.tmp-dynamic-uses
+          shell: sh
 
-  - name: "Download cross-repo files 2"
-    uses: "market-intelligence/connect-foundation/.cicd/compiled@main"
-    if: ${{ false }}
+        - name: "Download cross-repo files 1"
+          uses: "market-intelligence/connect-foundation-mateusz-budzisz/.cicd/compiled@main"
+          if: ${{ '$' }}{{ false }}
+    
+        - name: "Download cross-repo files 2"
+          uses: "market-intelligence/connect-foundation/.cicd/compiled@main"
+          if: ${{ '$' }}{{ false }}
+      DYNAMIC_USES_EOF
+  - name: Run
+    id: run
+    uses: ./.tmp-dynamic-uses
+
+
 
 #  - name: "Sharp Value Injector"
 #    # language=sh
