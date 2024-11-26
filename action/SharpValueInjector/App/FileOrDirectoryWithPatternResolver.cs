@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
+using SharpValueInjector.Tests;
 
 namespace SharpValueInjector.App;
 
@@ -32,6 +33,25 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             .ToImmutableDictionary(x => x.Key, x => x.ToArray());
 
         var files = groupedByPattern.GetValueOrDefault(false) ?? [];
+
+        files = files.Select(x =>
+        {
+            if (!x.Contains('$'))
+                return x;
+
+            var (actionRef, filePath) = CompositeActionFetcher.SplitFetchActionLocator(x);
+
+            var p = actionRef.Split("/");
+            var b = actionRef.Substring(actionRef.IndexOf('@') + 1, actionRef.IndexOf('$'));
+
+            for (var i = 2; i < p.Length; i++)
+            {
+                b += p[i];
+            }
+
+            return Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "_actions", p[0], p[1], b, filePath);
+        }).ToArray();
+
         // Paths without pattern are supposed to be existing files
         foreach (var file in files)
         {
