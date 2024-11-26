@@ -2,7 +2,7 @@
 // To do so, we create a new action yaml that will consists of mock composite actions to download files from other repositories
 // This action should output input file list
 
-using SharpValueInjector.Tests;
+using Shared;
 
 Console.Out.WriteLine("Generate composite action to fetch files from other repositories");
 var inputFiles = Environment.GetEnvironmentVariable("SVI_INPUT");

@@ -15,5 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GitHubActionFetcher\GitHubActionFetcher.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 </Project>

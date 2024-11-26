@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
-using SharpValueInjector.Tests;
+using Shared;
 
 namespace SharpValueInjector.App;
 
