@@ -28,6 +28,7 @@ var inputFilesWithCompositeAction = inputFiles
 var yaml  = CompositeActionFetcher.ActionRefsToCompoundCompositeFetchActionYaml(inputFilesWithCompositeAction);
 
 var path = Path.Join(githubWorkspace, "github-action-fetcher", "action.yml");
+Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
 await File.WriteAllLinesAsync(path, yaml);
 Console.Out.WriteLine("{0} is generated", path);
