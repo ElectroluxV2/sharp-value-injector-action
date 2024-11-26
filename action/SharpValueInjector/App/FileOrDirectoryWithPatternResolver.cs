@@ -41,7 +41,7 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
 
             var (actionRef, filePath) = CompositeActionFetcher.SplitFetchActionLocator(x);
 
-            var p = actionRef.Split("/");
+            var p = actionRef.Split('@')[0].Split("/");
             var b = actionRef.Substring(actionRef.IndexOf('@') + 1);
 
 
@@ -50,7 +50,7 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
                 b = Path.Combine(b, p[i]);
             }
 
-            return Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "_actions", p[0], p[1], b, filePath);
+            return Path.Combine("/gha/_work/_actions", p[0], p[1], b, filePath);
         }).ToArray();
 
         // Paths without pattern are supposed to be existing files
