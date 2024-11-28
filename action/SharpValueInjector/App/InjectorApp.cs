@@ -18,11 +18,11 @@ public class InjectorApp(
     ConsoleCancellationToken consoleCancellationToken
 )
 {
-    public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string? awsSmToken, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
         return new ServiceCollection()
             .AddSingleton(new ConsoleCancellationToken(cancellationToken))
-            .AddSingleton(new SharpValueInjectionConfiguration(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, awsSmToken))
+            .AddSingleton(new SharpValueInjectionConfiguration(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption))
             .AddLogging()
             .AddSerilog(loggerConfiguration =>
             {
@@ -46,9 +46,9 @@ public class InjectorApp(
             .BuildServiceProvider();
     }
 
-    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string? awsSmToken, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
-        var serviceProvider = BuildServiceProvider(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, awsSmToken, logLevel, cancellationToken);
+        var serviceProvider = BuildServiceProvider(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption, logLevel, cancellationToken);
         return await serviceProvider.GetRequiredService<InjectorApp>().RunAsync();
     }
 

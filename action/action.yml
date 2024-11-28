@@ -59,4 +59,4 @@ runs:
       SVI_OPENING_TOKEN: ${{ inputs.opening-token }}
       SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
       SVI_LOG_LEVEL: ${{ inputs.log-level }}
-      GITHUB_WORKSPACE: ${{ github.workspace }}
+      GITHUB_ACTIONS_PATH: "${{ runner.temp }}/../_actions"

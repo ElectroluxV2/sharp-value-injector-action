@@ -4,7 +4,7 @@ using Shared;
 
 namespace SharpValueInjector.App;
 
-public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatternResolver> logger)
+public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatternResolver> logger, SharpValueInjectionConfiguration configuration)
 {
     public (string[] Files, (string Directory, string Pattern)[] DirectoriesWithPattern, Uri[] Links) SplitAndValidate(string[] filesOrDirectoriesWithPattern)
     {
@@ -32,26 +32,12 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             .GroupBy(x => x.Contains('*'))
             .ToImmutableDictionary(x => x.Key, x => x.ToArray());
 
-        var files = groupedByPattern.GetValueOrDefault(false) ?? [];
-
-        files = files.Select(x =>
-        {
-            if (!x.Contains('$'))
-                return x;
-
-            var (actionRef, filePath) = CompositeActionFetcher.SplitFetchActionLocator(x);
-
-            var p = actionRef.Split('@')[0].Split("/");
-            var b = actionRef.Substring(actionRef.IndexOf('@') + 1);
-
-
-            for (var i = 2; i < p.Length; i++)
-            {
-                b = Path.Combine(b, p[i]);
-            }
-
-            return Path.Combine("/gha/_work/_actions", p[0], p[1], b, filePath);
-        }).ToArray();
+        var files = groupedByPattern
+            .GetValueOrDefault(false)
+            ?.Select(x => ResolveCompositeActionPath(configuration.GithubActionsPath, x))
+            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            ?.ToArray()
+            ?? [];
 
         // Paths without pattern are supposed to be existing files
         foreach (var file in files)
@@ -82,5 +68,19 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
         }
         
         return (files, directoriesAndPatterns, links);
+    }
+
+    public static string ResolveCompositeActionPath(string githubActionsPath, string compositeActionRef)
+    {
+        // Composite action ref format: owner/repo@version$path/to/action
+        if (!compositeActionRef.Contains('$')) return compositeActionRef;
+
+        var (actionRef, filePath) = CompositeActionFetcher.SplitFetchActionLocator(compositeActionRef);
+        if (actionRef.Split('@') is not [var locator, var version])
+        {
+            throw new ArgumentException($"Invalid composite action locator ({compositeActionRef})", nameof(compositeActionRef));
+        }
+
+        return Path.Combine(githubActionsPath, locator, version, filePath);
     }
 }
