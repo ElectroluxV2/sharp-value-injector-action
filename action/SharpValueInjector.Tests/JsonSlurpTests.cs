@@ -16,7 +16,7 @@ public class JsonSlurpTests
     public async Task Flatten_JsonWithNestedObjects_ReturnsFlattenedDictionary()
     {
         // Arrange
-        var serviceProvider = InjectorApp.BuildServiceProvider(default!, default!, default, default, default!, default!, default, LogLevel.Debug);
+        var serviceProvider = InjectorApp.BuildServiceProvider(default!, default!, default, default, default!, default!, default!, LogLevel.Debug);
         var slurp = serviceProvider.GetRequiredService<JsonSlurp>();
 
         var json = ToBytes(

@@ -46,9 +46,9 @@ public class InjectorApp(
             .BuildServiceProvider();
     }
 
-    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPath, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
-        var serviceProvider = BuildServiceProvider(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption, logLevel, cancellationToken);
+        var serviceProvider = BuildServiceProvider(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPath, logLevel, cancellationToken);
         return await serviceProvider.GetRequiredService<InjectorApp>().RunAsync();
     }
 

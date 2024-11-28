@@ -81,6 +81,6 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             throw new ArgumentException($"Invalid composite action locator ({compositeActionRef})", nameof(compositeActionRef));
         }
 
-        return Path.Combine(githubActionsPath, locator, version, filePath);
+        return Path.GetFullPath(Path.Combine(githubActionsPath, locator, version, filePath));
     }
 }
