@@ -33,24 +33,11 @@ runs:
   using: "composite"
   steps:
   # TODO: Create prod version of this action that will run compiled binary instead of source code.
-  - name: "Setup .NET"
+  - name: "Install .NET 9-prev.2"
     uses: "actions/setup-dotnet@v4"
     with:
       dotnet-quality: "daily"
       dotnet-version: "9.0.2xx"
-
-  - name: "Compose GitHub Action Fetcher"
-    shell: bash # language=sh
-    run: |
-      dotnet run --project "${GITHUB_ACTION_PATH}/GitHubActionFetcher/GitHubActionFetcher.csproj"
-    env:
-      SVI_INPUT: ${{ inputs.input }}
-      GITHUB_WORKSPACE: ${{ github.workspace }}
-    if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
-
-  - name: "Fetch files using Composed GitHub Action"
-    uses: "./github-action-fetcher"
-    if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Sharp Value Injector"
     # language=sh
@@ -65,4 +52,3 @@ runs:
       SVI_OPENING_TOKEN: ${{ inputs.opening-token }}
       SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
       SVI_LOG_LEVEL: ${{ inputs.log-level }}
-      GITHUB_ACTIONS_PATH: "${{ runner.temp }}/../_actions"

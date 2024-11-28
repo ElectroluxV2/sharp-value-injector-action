@@ -1,6 +1,6 @@
 using System.IO.Enumeration;
 using Microsoft.Extensions.Logging;
-using Shared;
+using SharpValueInjector.Shared;
 
 namespace SharpValueInjector.App;
 

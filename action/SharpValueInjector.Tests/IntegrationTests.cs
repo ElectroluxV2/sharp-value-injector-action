@@ -52,7 +52,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -74,7 +74,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -96,7 +96,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -118,7 +118,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -140,7 +140,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -162,7 +162,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -184,7 +184,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -211,7 +211,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -237,7 +237,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -258,7 +258,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );
@@ -280,7 +280,7 @@ public class IntegrationTests
             false,
             "#{",
             "}",
-            null!,
+            null,
             LogLevel.Information,
             cancellationToken
         );

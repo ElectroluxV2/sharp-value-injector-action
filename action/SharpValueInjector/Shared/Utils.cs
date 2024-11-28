@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Shared;
+namespace SharpValueInjector.Shared;
 
 public static class Utils
 {

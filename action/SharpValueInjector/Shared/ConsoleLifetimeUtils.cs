@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Shared;
+namespace SharpValueInjector.Shared;
 
 public static class ConsoleLifetimeUtils
 {

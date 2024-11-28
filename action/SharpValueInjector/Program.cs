@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SharpValueInjector.App;
 using Spectre.Console;
-using static Shared.ConsoleLifetimeUtils;
+using static SharpValueInjector.Shared.ConsoleLifetimeUtils;
 
 var outputFilesArgument = new Argument<string[]>(
     "output",
@@ -43,10 +43,9 @@ var closingTokenOption = new Option<string>(
     "The closing token for variable interpolation."
 );
 
-var githubActionsPathOption = new Option<string>(
-    "--github-actions-path",
-    () => Environment.GetEnvironmentVariable("GITHUB_ACTIONS_PATH") ?? string.Empty,
-    "For example /gha/_work/_actions, used to resolve composite action references."
+var awsSmTokenOption = new Option<string>(
+    "--aws-sm-token",
+    "The AWS Secrets Manager token to use for fetching secrets. When not provided, AWS SM secrets detection & fetching is disabled."
 );
 
 var logLevelOption = new Option<LogLevel>(
@@ -63,16 +62,16 @@ var root = new RootCommand("Injects values from given inputs into given files. S
     ignoreCaseOption,
     openingTokenOption,
     closingTokenOption,
-    githubActionsPathOption,
+    awsSmTokenOption,
     logLevelOption,
 };
 
-root.SetHandler(async (outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption, logLevel) =>
+root.SetHandler(async (outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, awsSmToken, logLevel) =>
 {
     try
     {
         var cancellationToken = CreateConsoleLifetimeBoundCancellationToken();
-        var exitCode = await InjectorApp.BootstrapAsync(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption, logLevel, cancellationToken);
+        var exitCode = await InjectorApp.BootstrapAsync(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, awsSmToken, logLevel, cancellationToken);
         Environment.Exit(exitCode);
     }
     catch (TaskCanceledException)
@@ -84,7 +83,7 @@ root.SetHandler(async (outputFiles, inputFiles, recurseSubdirectories, ignoreCas
         AnsiConsole.WriteException(ex);
         Environment.Exit(1);
     }
-}, outputFilesArgument, inputFilesOption, recurseSubdirectoriesOption, ignoreCaseOption, openingTokenOption, closingTokenOption, githubActionsPathOption, logLevelOption);
+}, outputFilesArgument, inputFilesOption, recurseSubdirectoriesOption, ignoreCaseOption, openingTokenOption, closingTokenOption, awsSmTokenOption, logLevelOption);
 
 return await root.InvokeAsync(args);
 
@@ -94,4 +93,4 @@ bool? BoolFromEnv(string variable)
     return value is not null ? bool.Parse(value) : null;
 }
 
-string[] ArrayFromEnv(string variable) => Environment.GetEnvironmentVariable(variable)?.ReplaceLineEndings(string.Empty).Split(";").Select(x => x.Trim()).ToArray() ?? [];
+string[] ArrayFromEnv(string variable) => Environment.GetEnvironmentVariable(variable)?.Split(";").Select(x => x.Trim()).ToArray() ?? [];

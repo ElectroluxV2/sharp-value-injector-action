@@ -1,4 +1,4 @@
-namespace Shared;
+namespace SharpValueInjector.Shared;
 
 public record ConsoleCancellationToken(CancellationToken Token)
 {
