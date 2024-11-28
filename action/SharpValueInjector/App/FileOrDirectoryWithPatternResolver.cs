@@ -72,15 +72,21 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
 
     public static string ResolveCompositeActionPath(string githubActionsPath, string compositeActionRef)
     {
-        // Composite action ref format: owner/repo@version$path/to/action
+        // Composite action ref format: owner/repo/path/to/action@version$path/to/some/file
+        // Expected outcome: owner/repo/path/to/action/version/path/to/some/file
         if (!compositeActionRef.Contains('$')) return compositeActionRef;
 
         var (actionRef, filePath) = CompositeActionFetcher.SplitFetchActionLocator(compositeActionRef);
-        if (actionRef.Split('@') is not [var locator, var version])
+        var ownerAndRepoEndIndex = actionRef.IndexOf('/', actionRef.IndexOf('/') + 1);
+        var ownerAndRepo = actionRef[..ownerAndRepoEndIndex];
+        var pathToActionWithVersion = actionRef[(ownerAndRepoEndIndex + 1)..];
+
+
+        if (pathToActionWithVersion.Split('@') is not [var pathToAction, var version])
         {
             throw new ArgumentException($"Invalid composite action locator ({compositeActionRef})", nameof(compositeActionRef));
         }
 
-        return Path.GetFullPath(Path.Combine(githubActionsPath, locator, version, filePath));
+        return Path.GetFullPath(Path.Combine(githubActionsPath, ownerAndRepo, version, pathToAction, filePath));
     }
 }

@@ -8,8 +8,8 @@ namespace SharpValueInjector.Tests;
 public class FileOrDirectoryWithPatternResolverTests
 {
     [Test]
-    [Arguments("/gha/_temp/../_actions", "owner/repo@main$src/sample", "/gha/_actions/owner/repo/main/src/sample")]
-    [Arguments("/gha/_actions", "owner/repo@main$src/sample", "/gha/_actions/owner/repo/main/src/sample")]
+    [Arguments("/gha/_temp/../_actions", "owner/repo/src/sample@main$inner/path", "/gha/_actions/owner/repo/main/src/sample/inner/path")]
+    [Arguments("/gha/_actions", "owner/repo/src/sample@main$inner/path", "/gha/_actions/owner/repo/main/src/sample/inner/path")]
     public async Task ResolveCompositeActionPath_ShouldReturnCorrectPath_WhenPathIsGiven(string gha, string given, string expcted)
     {
         var result = FileOrDirectoryWithPatternResolver.ResolveCompositeActionPath(gha, given);
