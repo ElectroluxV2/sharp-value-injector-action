@@ -1,6 +1,6 @@
 ﻿// Because $GITHUB_TOKEN is scoped to repository, we need to support cross repo file fetch by mock composite action
 // To do so, we create a new action yaml that will consists of mock composite actions to download files from other repositories
-// This action should output input file list
+// This program will generate the action yaml
 
 using Shared;
 
