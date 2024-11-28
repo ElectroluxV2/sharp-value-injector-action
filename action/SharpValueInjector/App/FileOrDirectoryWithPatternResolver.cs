@@ -34,7 +34,7 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
 
         var files = groupedByPattern
             .GetValueOrDefault(false)
-            ?.Select(x => ResolveCompositeActionPath(configuration.GithubActionsPath, x))
+            ?.Select(x => ResolvePathInCompositeAction(configuration.GithubActionsPath, x))
             // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
             ?.ToArray()
             ?? [];
@@ -70,7 +70,7 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
         return (files, directoriesAndPatterns, links);
     }
 
-    public static string ResolveCompositeActionPath(string githubActionsPath, string compositeActionRef)
+    public static string ResolvePathInCompositeAction(string githubActionsPath, string compositeActionRef)
     {
         // Composite action ref format: owner/repo/path/to/action@version$path/to/some/file
         // Expected outcome: owner/repo/path/to/action/version/path/to/some/file
