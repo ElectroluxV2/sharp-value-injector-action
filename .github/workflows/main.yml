@@ -30,7 +30,7 @@ jobs:
         dotnet-quality: "daily"
         dotnet-version: "9.0.2xx"
         cache: true
-        cache-dependency-path: action/SharpValueInjector.Tests/packages.lock.json
+        cache-dependency-path: action/SharpValueInjector/packages.lock.json
 
     - name: "Restore"
       run: dotnet restore --locked-mode SharpValueInjector.slnx
