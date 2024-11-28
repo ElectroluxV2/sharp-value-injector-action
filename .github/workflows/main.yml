@@ -33,7 +33,7 @@ jobs:
         cache-dependency-path: action/SharpValueInjector/packages.lock.json
 
     - name: "Restore"
-      run: dotnet restore --locked-mode SharpValueInjector.slnx
+      run: dotnet restore --force-evaluate --locked-mode SharpValueInjector.slnx
       shell: "bash"
 
     - name: "Build"
