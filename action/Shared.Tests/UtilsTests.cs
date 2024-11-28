@@ -1,6 +1,4 @@
-using SharpValueInjector.Shared;
-
-namespace SharpValueInjector.Tests;
+namespace Shared.Tests;
 
 using static Utils;
 

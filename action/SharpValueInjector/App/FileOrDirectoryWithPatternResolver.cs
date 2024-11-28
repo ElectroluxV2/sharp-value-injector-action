@@ -1,9 +1,10 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
+using Shared;
 
 namespace SharpValueInjector.App;
 
-public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatternResolver> logger)
+public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatternResolver> logger, SharpValueInjectionConfiguration configuration)
 {
     public (string[] Files, (string Directory, string Pattern)[] DirectoriesWithPattern, Uri[] Links) SplitAndValidate(string[] filesOrDirectoriesWithPattern)
     {
@@ -31,7 +32,13 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
             .GroupBy(x => x.Contains('*'))
             .ToImmutableDictionary(x => x.Key, x => x.ToArray());
 
-        var files = groupedByPattern.GetValueOrDefault(false) ?? [];
+        var files = groupedByPattern
+            .GetValueOrDefault(false)
+            ?.Select(x => ResolvePathInCompositeAction(configuration.GithubActionsPath, x))
+            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            ?.ToArray()
+            ?? [];
+
         // Paths without pattern are supposed to be existing files
         foreach (var file in files)
         {
@@ -61,5 +68,25 @@ public class FileOrDirectoryWithPatternResolver(ILogger<FileOrDirectoryWithPatte
         }
         
         return (files, directoriesAndPatterns, links);
+    }
+
+    public static string ResolvePathInCompositeAction(string githubActionsPath, string compositeActionRef)
+    {
+        // Composite action ref format: owner/repo/path/to/action@version$path/to/some/file
+        // Expected outcome: owner/repo/path/to/action/version/path/to/some/file
+        if (!compositeActionRef.Contains('$')) return compositeActionRef;
+
+        var (actionRef, filePath) = CompositeActionFetcher.SplitFetchActionLocator(compositeActionRef);
+        var ownerAndRepoEndIndex = actionRef.IndexOf('/', actionRef.IndexOf('/') + 1);
+        var ownerAndRepo = actionRef[..ownerAndRepoEndIndex];
+        var pathToActionWithVersion = actionRef[(ownerAndRepoEndIndex + 1)..];
+
+
+        if (pathToActionWithVersion.Split('@') is not [var pathToAction, var version])
+        {
+            throw new ArgumentException($"Invalid composite action locator ({compositeActionRef})", nameof(compositeActionRef));
+        }
+
+        return Path.GetFullPath(Path.Combine(githubActionsPath, ownerAndRepo, version, pathToAction, filePath));
     }
 }

@@ -6,19 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpValueInjector\SharpValueInjector.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Samples\**\*.*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="TUnit" Version="0.1.897" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GitHubActionFetcher\GitHubActionFetcher.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 </Project>
