@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SharpValueInjector.App;
 
-public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolver> logger, JsonSlurp jsonSlurp)
+public class HierarchicalPlainTextInjectionsResolver(ILogger<HierarchicalPlainTextInjectionsResolver> logger, JsonSlurp jsonSlurp)
 {
     public async Task<FrozenDictionary<string, string>> MakeFromInputFilesAsync(IReadOnlyCollection<Stream> inputFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
             var memoryStream = new MemoryStream();
             await inputFile.CopyToAsync(memoryStream, cancellationToken);
             
-            var flattened = jsonSlurp.Flatten(memoryStream.ToArray());
+            var flattened = jsonSlurp.FlattenVariables(memoryStream.ToArray());
             
             foreach (var (key, value) in flattened)
             {

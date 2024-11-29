@@ -4,6 +4,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Shared;
+using SharpValueInjector.App.Functions;
 
 namespace SharpValueInjector.App;
 
@@ -12,7 +13,7 @@ public class InjectorApp(
     SharpValueInjectionConfiguration configuration,
     FileOrDirectoryWithPatternResolver fileOrDirectoryWithPatternResolver,
     DirectoryWalker directoryWalker,
-    HierarchicalInjectionsResolver hierarchicalInjectionsResolver,
+    HierarchicalPlainTextInjectionsResolver hierarchicalPlainTextInjectionsResolver,
     FileInjector fileInjector,
     FileFetcher fileFetcher,
     ConsoleCancellationToken consoleCancellationToken
@@ -29,20 +30,23 @@ public class InjectorApp(
                 loggerConfiguration.MinimumLevel.Is((LogEventLevel) logLevel);
 
                 loggerConfiguration.WriteTo.Console(
-                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:w3}]{Scope:l} {Message:lj}{NewLine}{Exception}",
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:l}] {SourceContext}{NewLine}=>{Scope:l} {Message:lj}{NewLine}{Exception}{NewLine}",
                     applyThemeToRedirectedOutput: true,
                     theme: SystemConsoleTheme.Literate
                 );
+
+                loggerConfiguration.Enrich.With(new ScopePathSerilogEnricher());
             })
             .AddHttpClient()
             .AddSingleton<InjectorApp>()
             .AddTransient<JsonSlurp>()
             .AddTransient<FileInjector>()
-            .AddTransient<HierarchicalInjectionsResolver>()
+            .AddTransient<HierarchicalPlainTextInjectionsResolver>()
             .AddTransient<DirectoryWalker>()
             .AddTransient<FileOrDirectoryWithPatternResolver>()
             .AddTransient<UriMapper>()
             .AddTransient<FileFetcher>()
+            .AddFunctions()
             .BuildServiceProvider();
     }
 
@@ -67,9 +71,8 @@ public class InjectorApp(
 
         logger.LogInformation("Input files count: {InputFilesCount}", inputFiles.Count);
 
-        // This will contain all injectable values (both plain values & AWS SM ARNs)
-        // TODO: Implement ARN resolution
-        var injections = await hierarchicalInjectionsResolver
+        // This will contain all injectable values
+        var injections = await hierarchicalPlainTextInjectionsResolver
             .MakeFromInputFilesAsync(inputFiles, configuration.OpeningToken, configuration.ClosingToken, consoleCancellationToken);
         
         // Print all resolved injections
