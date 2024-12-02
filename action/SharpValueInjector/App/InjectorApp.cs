@@ -109,6 +109,7 @@ public class InjectorApp(
         }
 
         var injectionKeySet = injections.Keys.ToFrozenSet();
+        var valueSupplier = new Func<string, ValueTask<string>>(key => GetOrResolveInjectionValue(key, injections[key]));
 
         var (outputFilesFromConfiguration, outputDirectoriesAndPatterns, _) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);
         var outputFiles = directoryWalker
@@ -117,7 +118,7 @@ public class InjectorApp(
 
         // Concurrent inject
         await outputFiles
-            .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, GetOrResolveInjectionValue, consoleCancellationToken))
+            .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, valueSupplier, consoleCancellationToken))
             .ToArrayAsync(consoleCancellationToken);
         
         return 0;
