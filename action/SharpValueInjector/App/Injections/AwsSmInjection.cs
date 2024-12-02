@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Amazon;
 using Amazon.SecretsManager;
 
 namespace SharpValueInjector.App.Injections;
@@ -11,7 +12,7 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
     private static class AwsSmService
     {
         private static readonly ConcurrentDictionary<string, FrozenDictionary<string, string>> SecretsCache = new();
-        private static readonly AmazonSecretsManagerClient Client = new();
+        private static readonly AmazonSecretsManagerClient Client = new(RegionEndpoint.USEast1);
 
         public static async ValueTask<string> GetSecretValueAsync(string arnOrId, string keyInsideSecret, CancellationToken cancellationToken)
         {
