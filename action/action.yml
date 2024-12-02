@@ -5,9 +5,12 @@ inputs:
   output:
     description: "Files to inject values into or directories to scan (may contain file name patterns such as '/sample/path/*.yaml'.). To specify multiple outputs, separate them with ';'."
     required: true
-  input:
-    description: "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain values to inject into target files. To specify multiple files, separate them with ';'. Order matters when resolving conflicts."
+  variables:
+    description: "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain values to inject into target files. To specify multiple files, separate them with new line or ';'. Order matters when resolving conflicts."
     required: true
+  secrets:
+    description: "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain secrets to inject into target files. To specify multiple files, separate them with new line or ';'. Order matters when resolving conflicts."
+    required: false
   recurse-subdirectories:
     description: "Weather to scan subdirectories of the given directories."
     required: false
@@ -59,7 +62,8 @@ runs:
     shell: "bash"
     env:
       SVI_OUTPUT: ${{ inputs.output }}
-      SVI_INPUT: ${{ inputs.input }}
+      SVI_VARIABLE: ${{ inputs.variables }}
+      SVI_SECRET: ${{ inputs.secrets }}
       SVI_RECURSE_SUBDIRECTORIES: ${{ inputs.recurse-subdirectories }}
       SVI_IGNORE_CASE: ${{ inputs.ignore-case }}
       SVI_OPENING_TOKEN: ${{ inputs.opening-token }}
