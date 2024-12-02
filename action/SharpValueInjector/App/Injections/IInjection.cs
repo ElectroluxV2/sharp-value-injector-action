@@ -2,15 +2,18 @@ namespace SharpValueInjector.App.Injections;
 
 public interface IInjection
 {
-    /// <summary>
-    /// This method can be called multiple times, so it should be idempotent.
-    /// </summary>
+    /// <remarks>
+    /// This method MUST be awaited only once
+    /// </remarks>
     /// <returns>Value that is going to be used when injecting to the output file or evaluating function result</returns>
-    public ValueTask<string> ProvisionInjectionValueAsync();
+    public ValueTask<string> ProvisionInjectionValueAsync(CancellationToken cancellationToken = default);
 
+    /// <remarks>
+    /// This method MUST be awaited only once
+    /// </remarks>
     /// <summary>
     ///   If the injection value should not be logged, this method should return some replacement.
     /// </summary>
     /// <returns>Value that is going to be used when logging</returns>
-    public ValueTask<string> ProvisionLogValueAsync() => ProvisionInjectionValueAsync();
+    public ValueTask<string> ProvisionLogValueAsync(CancellationToken cancellationToken = default) => ProvisionInjectionValueAsync(cancellationToken);
 }

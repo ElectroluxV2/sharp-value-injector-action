@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -5,6 +7,7 @@ using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Shared;
 using SharpValueInjector.App.Functions;
+using SharpValueInjector.App.Injections;
 
 namespace SharpValueInjector.App;
 
@@ -19,6 +22,20 @@ public class InjectorApp(
     ConsoleCancellationToken consoleCancellationToken
 )
 {
+    private static readonly ConcurrentDictionary<string, string> ResolvedInjectionValues = new();
+
+    private static async ValueTask<string> GetOrResolveInjectionValue(string key, IInjection injection)
+    {
+        if (ResolvedInjectionValues.TryGetValue(key, out var cachedValue))
+        {
+            return cachedValue;
+        }
+
+        var resolved = await injection.ProvisionInjectionValueAsync();
+        ResolvedInjectionValues[key] = resolved;
+        return resolved;
+    }
+
     public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] variableFiles, string[] secretFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
         return new ServiceCollection()
@@ -88,8 +105,10 @@ public class InjectorApp(
         // Print all resolved injections
         foreach (var (key, injection) in injections)
         {
-            logger.LogInformation("Resolved key {Key} with value {LogValue}", key, await injection.ProvisionLogValueAsync());
+            logger.LogInformation("Resolved key {Key} with value {LogValue}", key, await injection.ProvisionLogValueAsync(consoleCancellationToken));
         }
+
+        var injectionKeySet = injections.Keys.ToFrozenSet();
 
         var (outputFilesFromConfiguration, outputDirectoriesAndPatterns, _) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);
         var outputFiles = directoryWalker
@@ -98,7 +117,7 @@ public class InjectorApp(
 
         // Concurrent inject
         await outputFiles
-            .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injections, consoleCancellationToken))
+            .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, GetOrResolveInjectionValue, consoleCancellationToken))
             .ToArrayAsync(consoleCancellationToken);
         
         return 0;

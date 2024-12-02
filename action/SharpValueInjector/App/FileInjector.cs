@@ -1,12 +1,11 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
-using SharpValueInjector.App.Injections;
 
 namespace SharpValueInjector.App;
 
 public class FileInjector(ILogger<FileInjector> logger)
 {
-    public async ValueTask InjectAsync(string path, string openingToken, string closingToken, IDictionary<string, IInjection> injections, CancellationToken cancellationToken)
+    public async ValueTask InjectAsync(string path, string openingToken, string closingToken, ISet<string> injections, Func<string, ValueTask<string>> injectionValueSupplier, CancellationToken cancellationToken)
     {
         try
         {
@@ -21,9 +20,9 @@ public class FileInjector(ILogger<FileInjector> logger)
 
                 // PERF: It should be possible to replace this within a single pass
                 var sb = new StringBuilder(line);
-                foreach (var (key, injection) in injections)
+                foreach (var key in injections)
                 {
-                    sb.Replace($"{openingToken}{key}{closingToken}", await injection.ProvisionInjectionValueAsync());
+                    sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
                 }
 
                 await writer.WriteLineAsync(sb.ToString());
