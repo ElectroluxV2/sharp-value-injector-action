@@ -33,7 +33,7 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
             var json = await GetSecretAsync(arnOrId, cancellationToken);
             if (json is not null)
             {
-                dict = JsonSerializer.Deserialize<FrozenDictionary<string, string>>(json);
+                dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json)?.ToFrozenDictionary();
             }
 
             dict ??= FrozenDictionary<string, string>.Empty;
