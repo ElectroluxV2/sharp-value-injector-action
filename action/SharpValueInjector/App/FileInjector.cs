@@ -13,6 +13,8 @@ public class FileInjector(ILogger<FileInjector> logger)
             using var reader = File.OpenText(path);
             await using var writer = File.CreateText($"{path}.injected");
 
+            using var s = logger.BeginScope(Path.GetFileName(path));
+
             while (!reader.EndOfStream)
             {
                 var line = await reader.ReadLineAsync(cancellationToken);
@@ -23,6 +25,7 @@ public class FileInjector(ILogger<FileInjector> logger)
                 foreach (var key in injections)
                 {
                     sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
+                    logger.LogCritical("Trying: {key}", key);
                 }
 
                 await writer.WriteLineAsync(sb.ToString());
