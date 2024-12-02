@@ -15,7 +15,7 @@ public class JsonSlurpTests
     public async Task FlattenVariables_JsonWithNestedObjects_ReturnsFlattenedDictionary()
     {
         // Arrange
-        var serviceProvider = InjectorApp.BuildServiceProvider(default!, default!, default, default, default!, default!, default!, LogLevel.Debug);
+        var serviceProvider = InjectorApp.BuildServiceProvider(default!, default!, default!, default, default, default!, default!, default!, LogLevel.Debug);
         var slurp = serviceProvider.GetRequiredService<JsonSlurp>();
 
         var json = ToBytes(
@@ -129,7 +129,7 @@ public class JsonSlurpTests
     public async Task FlattenSecrets_ShouldWork([StringSyntax("json")] string json, string expectedKey, AwsSmInjection expectedInjection)
     {
         // Arrange
-        var serviceProvider = InjectorApp.BuildServiceProvider(default!, default!, default, default, default!, default!, default!, LogLevel.Debug);
+        var serviceProvider = InjectorApp.BuildServiceProvider(default!, default!, default!, default, default, default!, default!, default!, LogLevel.Debug);
         var slurp = serviceProvider.GetRequiredService<JsonSlurp>();
 
         // Act

@@ -13,17 +13,17 @@ public class InjectorApp(
     SharpValueInjectionConfiguration configuration,
     FileOrDirectoryWithPatternResolver fileOrDirectoryWithPatternResolver,
     DirectoryWalker directoryWalker,
-    HierarchicalPlainTextInjectionsResolver hierarchicalPlainTextInjectionsResolver,
+    HierarchicalPlainTextInjectionsResolver hierarchicalInjectionsResolver,
     FileInjector fileInjector,
     FileFetcher fileFetcher,
     ConsoleCancellationToken consoleCancellationToken
 )
 {
-    public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] variableFiles, string[] secretFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
         return new ServiceCollection()
             .AddSingleton(new ConsoleCancellationToken(cancellationToken))
-            .AddSingleton(new SharpValueInjectionConfiguration(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption))
+            .AddSingleton(new SharpValueInjectionConfiguration(outputFiles, variableFiles, secretFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption))
             .AddLogging()
             .AddSerilog(loggerConfiguration =>
             {
@@ -50,35 +50,45 @@ public class InjectorApp(
             .BuildServiceProvider();
     }
 
-    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] inputFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPath, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] variableFiles, string[] secretFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPath, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
-        var serviceProvider = BuildServiceProvider(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPath, logLevel, cancellationToken);
+        var serviceProvider = BuildServiceProvider(outputFiles, variableFiles, secretFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPath, logLevel, cancellationToken);
         return await serviceProvider.GetRequiredService<InjectorApp>().RunAsync();
     }
 
     private async Task<int> RunAsync()
     {
-        var (inputFilesFromConfiguration, inputDirectoriesAndPatterns, inputFileLinks) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.InputFiles);
+        var (variableFilesFromConfiguration, variableDirectoriesAndPatterns, variableFileLinks) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.VariableFiles);
+        var (secretFilesFromConfiguration, secretDirectoriesAndPatterns, secretFileLinks) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.SecretFiles);
 
-        var remoteInputFiles = fileFetcher.FetchFilesAsync(inputFileLinks, consoleCancellationToken);
+        var remoteVariableFiles = fileFetcher.FetchFilesAsync(variableFileLinks, consoleCancellationToken);
+        var remoteSecretsFiles = fileFetcher.FetchFilesAsync(secretFileLinks, consoleCancellationToken);
 
-        var inputFiles = await directoryWalker
-            .WalkAsync(inputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
-            .Concat(inputFilesFromConfiguration.ToAsyncEnumerable())
+        var variableFiles = await directoryWalker
+            .WalkAsync(variableDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
+            .Concat(variableFilesFromConfiguration.ToAsyncEnumerable())
             .Select(File.OpenRead)
-            .Concat(remoteInputFiles)
+            .Concat(remoteVariableFiles)
             .ToListAsync();
 
-        logger.LogInformation("Input files count: {InputFilesCount}", inputFiles.Count);
+        var secretFiles = await directoryWalker
+            .WalkAsync(secretDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
+            .Concat(secretFilesFromConfiguration.ToAsyncEnumerable())
+            .Select(File.OpenRead)
+            .Concat(remoteSecretsFiles)
+            .ToListAsync();
+
+        logger.LogInformation("Variable files count: {VariableFilesCount}", variableFiles.Count);
+        logger.LogInformation("Secret files count: {SecretFilesCount}", secretFiles.Count);
 
         // This will contain all injectable values
-        var injections = await hierarchicalPlainTextInjectionsResolver
-            .MakeFromInputFilesAsync(inputFiles, configuration.OpeningToken, configuration.ClosingToken, consoleCancellationToken);
-        
+        var injections = await hierarchicalInjectionsResolver
+            .ResolveAsync(variableFiles, secretFiles, configuration.OpeningToken, configuration.ClosingToken, consoleCancellationToken);
+
         // Print all resolved injections
-        foreach (var (key, value) in injections)
+        foreach (var (key, injection) in injections)
         {
-            logger.LogInformation("Resolved key {Key} with value {Value}", key, value);
+            logger.LogInformation("Resolved key {Key} with value {LogValue}", key, await injection.ProvisionLogValueAsync());
         }
 
         var (outputFilesFromConfiguration, outputDirectoriesAndPatterns, _) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);

@@ -3,39 +3,76 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SharpValueInjector.App.Injections;
 
 namespace SharpValueInjector.App;
 
 public class HierarchicalPlainTextInjectionsResolver(ILogger<HierarchicalPlainTextInjectionsResolver> logger, JsonSlurp jsonSlurp)
 {
-    public async Task<FrozenDictionary<string, string>> MakeFromInputFilesAsync(IReadOnlyCollection<Stream> inputFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
+    public async Task<FrozenDictionary<string, IInjection>> ResolveAsync(IReadOnlyCollection<Stream> variableFiles, IReadOnlyCollection<Stream> secretFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {
-        // This will contain all injectable values (both plain values & AWS SM ARNs)
-        var conflictlessInjections = new Dictionary<string, string>();
-        foreach (var inputFile in inputFiles)
-        {
-            logger.LogInformation("Reading input file {InputFile}", inputFile);
+        var variableInjections = await ResolveVariableInjectionsAsync(variableFiles, openingToken, closingToken, cancellationToken);
+        var secretInjections = await ResolveSecretInjectionsAsync(secretFiles, cancellationToken);
 
-            // PERF: Investigate stackalloc byte buffer for remote files
+        return variableInjections.Concat(secretInjections).ToFrozenDictionary();
+    }
+
+    private async ValueTask<FrozenDictionary<string, IInjection>> ResolveSecretInjectionsAsync(IReadOnlyCollection<Stream> secretFiles, CancellationToken cancellationToken)
+    {
+        var conflictlessInjections = new Dictionary<string, AwsSmInjection>();
+        foreach (var inputFile in secretFiles)
+        {
+            logger.LogInformation("Reading secret file {InputFile}", inputFile);
+
             var memoryStream = new MemoryStream();
             await inputFile.CopyToAsync(memoryStream, cancellationToken);
-            
-            var flattened = jsonSlurp.FlattenVariables(memoryStream.ToArray());
-            
-            foreach (var (key, value) in flattened)
+
+            var flattened = jsonSlurp.FlattenSecrets(memoryStream.ToArray());
+
+            foreach (var (key, injection) in flattened)
             {
-                logger.LogInformation("Found key {Key} with value {Value}", key, value);
-                
+                logger.LogInformation("Found key {Key} with injection {AwsSmInjection}", key, injection);
+
                 if (conflictlessInjections.ContainsKey(key))
                 {
                     logger.LogWarning("Key {Key} already exists, overwriting", key);
                 }
-                
+
+                conflictlessInjections[key] = injection;
+            }
+        }
+
+        return conflictlessInjections.ToFrozenDictionary(x => x.Key, IInjection (x) => x.Value);
+    }
+
+    private async ValueTask<FrozenDictionary<string, IInjection>> ResolveVariableInjectionsAsync(IReadOnlyCollection<Stream> variableFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
+    {
+        // This will contain all injectable plain text values
+        var conflictlessInjections = new Dictionary<string, string>();
+        foreach (var inputFile in variableFiles)
+        {
+            logger.LogInformation("Reading variable file {InputFile}", inputFile);
+
+            // PERF: Investigate stackalloc byte buffer for remote files
+            var memoryStream = new MemoryStream();
+            await inputFile.CopyToAsync(memoryStream, cancellationToken);
+
+            var flattened = jsonSlurp.FlattenVariables(memoryStream.ToArray());
+
+            foreach (var (key, value) in flattened)
+            {
+                logger.LogInformation("Found key {Key} with value {Value}", key, value);
+
+                if (conflictlessInjections.ContainsKey(key))
+                {
+                    logger.LogWarning("Key {Key} already exists, overwriting", key);
+                }
+
                 conflictlessInjections[key] = value;
             }
         }
-        
-        // Each injection may consists of different injections
+
+        // Each plain text injection may consists of different injections
         var findRefsRegex = new Regex($"{Regex.Escape(openingToken)}(?<ref>[^{Regex.Escape(closingToken)}]+){Regex.Escape(closingToken)}");
         var serviceCollection = new ServiceCollection();
         var recursionTracker = new Dictionary<string, bool>();
@@ -49,7 +86,7 @@ public class HierarchicalPlainTextInjectionsResolver(ILogger<HierarchicalPlainTe
                 serviceCollection.AddKeyedSingleton(key, value);
                 continue;
             }
-            
+
             logger.LogInformation("Registering key {Key} => {Value} with dependencies {Dependencies}", key, value, string.Join(',', matches.Select(x => x.Groups["ref"].Value)));
             serviceCollection.AddKeyedSingleton<string>(key, (provider, _) =>
             {
@@ -64,15 +101,18 @@ public class HierarchicalPlainTextInjectionsResolver(ILogger<HierarchicalPlainTe
                 {
                     stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", provider.GetRequiredKeyedService<string>(refKey));
                 }
-            
+
                 return stringBuilder.ToString();
             });
         }
 
         var serviceProvider = serviceCollection.BuildServiceProvider();
-        
+
         // Now we can resolve all the injections
         return conflictlessInjections.Keys
-            .ToFrozenDictionary(injectionKey => injectionKey, injectionKey => serviceProvider.GetRequiredKeyedService<string>(injectionKey));
+            .ToFrozenDictionary<string, string, IInjection>(
+                injectionKey => injectionKey,
+                injectionKey => new PlainTextInjection(serviceProvider.GetRequiredKeyedService<string>(injectionKey))
+            );
     }
 }

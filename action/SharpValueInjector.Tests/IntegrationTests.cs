@@ -48,6 +48,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [beforeFile],
             [Path.Combine(Samples, "Simple", "input.json")],
+            [],
             true,
             false,
             "#{",
@@ -70,6 +71,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [beforeFile],
             [Path.Combine(Samples, "Complex", "input.json")],
+            [],
             true,
             false,
             "#{",
@@ -92,6 +94,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [beforeFile],
             [Path.Combine(Samples, "Reference", "input.json")],
+            [],
             true,
             false,
             "#{",
@@ -114,6 +117,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [beforeFile],
             [Path.Combine(Samples, "Recursive", "input.json")],
+            [],
             true,
             false,
             "#{",
@@ -136,6 +140,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [beforeFile],
             [Path.Combine(Samples, "Numeric", "input.json")],
+            [],
             true,
             false,
             "#{",
@@ -158,6 +163,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [beforeFile],
             [Path.Combine(Samples, "Boolean", "input.json")],
+            [],
             true,
             false,
             "#{",
@@ -180,6 +186,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [beforeFile],
             [Path.Combine(Samples, "Conflict", "input.json")],
+            [],
             true,
             false,
             "#{",
@@ -207,6 +214,7 @@ public class IntegrationTests
                 Path.Combine(Samples, "Hierarchy", "input-b.json"),
                 Path.Combine(Samples, "Hierarchy", "input-c.json"),
             ],
+            [],
             true,
             false,
             "#{",
@@ -233,6 +241,7 @@ public class IntegrationTests
                 Path.Combine(Samples, "Hierarchy", "input-b.json"),
                 Path.Combine(Samples, "Hierarchy", "input-a.json"),
             ],
+            [],
             true,
             false,
             "#{",
@@ -254,6 +263,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [Path.Combine(Samples, "Pattern", "a", "*.yml")],
             [Path.Combine(Samples, "Pattern", "a", "*.json")],
+            [],
             true,
             false,
             "#{",
@@ -276,6 +286,7 @@ public class IntegrationTests
         var code = await InjectorApp.BootstrapAsync(
             [Path.Combine(Samples, "Pattern", "*.yml")],
             [Path.Combine(Samples, "Pattern", "*.json")],
+            [],
             false,
             false,
             "#{",

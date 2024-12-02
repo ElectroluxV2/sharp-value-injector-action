@@ -10,14 +10,17 @@ var outputFilesArgument = new Argument<string[]>(
     "Files to inject values into or directories to scan (may contain file name patterns such as '/sample/path/*.yaml'.)."
 );
 
-var inputFilesOption = new Option<string[]>(
-    "--input",
-    () => ArrayFromEnv("SVI_INPUT"),
-    "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain values to inject into target files. To specify multiple files, use multiple --input options. Order matters when resolving conflicts."
-)
-{
-    IsRequired = true,
-};
+var variableFilesOption = new Option<string[]>(
+    "--variable",
+    () => ArrayFromEnv("SVI_VARIABLE"),
+    "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain plain text values to inject into target files. To specify multiple files, use multiple --variable options. Order matters when resolving conflicts."
+);
+
+var secretFilesOption = new Option<string[]>(
+    "--secret",
+    () => ArrayFromEnv("SVI_SECRET"),
+    "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain references to secrets to inject into target files. To specify multiple files, use multiple --secret options. Order matters when resolving conflicts."
+);
 
 var recurseSubdirectoriesOption = new Option<bool>(
     "--recurse-subdirectories",
@@ -57,7 +60,8 @@ var logLevelOption = new Option<LogLevel>(
 
 var root = new RootCommand("Injects values from given inputs into given files. Supports hierarchical conflict resolution, recursive directory scanning, file name patterns, recursive variable interpolation, secrets fetching, usage statistics.")
 {
-    inputFilesOption,
+    variableFilesOption,
+    secretFilesOption,
     outputFilesArgument,
     recurseSubdirectoriesOption,
     ignoreCaseOption,
@@ -67,24 +71,44 @@ var root = new RootCommand("Injects values from given inputs into given files. S
     logLevelOption,
 };
 
-root.SetHandler(async (outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption, logLevel) =>
+root.SetHandler(async context =>
 {
+    var outputFiles = context.ParseResult.GetValueForArgument(outputFilesArgument);
+    var variableFiles = context.ParseResult.GetValueForOption(variableFilesOption)!;
+    var secretFiles = context.ParseResult.GetValueForOption(secretFilesOption)!;
+    var recurseSubdirectories = context.ParseResult.GetValueForOption(recurseSubdirectoriesOption);
+    var ignoreCase = context.ParseResult.GetValueForOption(ignoreCaseOption);
+    var openingToken = context.ParseResult.GetValueForOption(openingTokenOption)!;
+    var closingToken = context.ParseResult.GetValueForOption(closingTokenOption)!;
+    var githubActionsPath = context.ParseResult.GetValueForOption(githubActionsPathOption)!;
+    var logLevel = context.ParseResult.GetValueForOption(logLevelOption);
+
     try
     {
         var cancellationToken = CreateConsoleLifetimeBoundCancellationToken();
-        var exitCode = await InjectorApp.BootstrapAsync(outputFiles, inputFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption, logLevel, cancellationToken);
-        Environment.Exit(exitCode);
+        context.ExitCode = await InjectorApp.BootstrapAsync(
+            outputFiles,
+            variableFiles,
+            secretFiles,
+            recurseSubdirectories,
+            ignoreCase,
+            openingToken,
+            closingToken,
+            githubActionsPath,
+            logLevel,
+            cancellationToken
+        );
     }
     catch (TaskCanceledException)
     {
-        Environment.Exit(2);
+        context.ExitCode = 2;
     }
     catch (Exception ex)
     {
         AnsiConsole.WriteException(ex);
-        Environment.Exit(1);
+        context.ExitCode = 1;
     }
-}, outputFilesArgument, inputFilesOption, recurseSubdirectoriesOption, ignoreCaseOption, openingTokenOption, closingTokenOption, githubActionsPathOption, logLevelOption);
+});
 
 return await root.InvokeAsync(args);
 
