@@ -1,6 +1,13 @@
 {
   "version": 1,
   "dependencies": {
-    "net9.0": {}
+    "net9.0": {
+      "Serilog": {
+        "type": "Direct",
+        "requested": "[4.1.0, )",
+        "resolved": "4.1.0",
+        "contentHash": "u1aZI8HZ62LWlq5dZLFwm6jMax/sUwnWZSw5lkPsCt518cJBxFKoNmc7oSxe5aA5BgSkzy9rzwFGR/i/acnSPw=="
+      }
+    }
   }
 }
