@@ -47,13 +47,16 @@ runs:
     run: |
       dotnet run --project "${GITHUB_ACTION_PATH}/GitHubActionFetcher/GitHubActionFetcher.csproj"
     env:
-      SVI_INPUT: ${{ inputs.input }}
+      # Combine variables & secrets into inputs
+      SVI_INPUT: |
+        ${{ inputs.variables }}
+        ${{ inputs.secrets }}
       GITHUB_WORKSPACE: ${{ github.workspace }}
-    if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
+    if: ${{ contains(inputs.variables, '$') || contains(inputs.secrets, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Fetch files using Composed GitHub Action"
     uses: "./github-action-fetcher"
-    if: ${{ contains(inputs.input, '$') }} # '$' is separator in input file path indicating that it is a composite action.
+    if: ${{ contains(inputs.variables, '$') || contains(inputs.secrets, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Sharp Value Injector"
     # language=sh
