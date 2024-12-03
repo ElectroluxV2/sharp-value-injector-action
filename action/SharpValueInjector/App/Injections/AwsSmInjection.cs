@@ -3,7 +3,10 @@ using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Amazon;
+using Amazon.Runtime;
+using Amazon.RuntimeDependencies;
 using Amazon.SecretsManager;
+using Amazon.SecurityToken;
 
 namespace SharpValueInjector.App.Injections;
 
@@ -12,7 +15,17 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
     private static class AwsSmService
     {
         private static readonly ConcurrentDictionary<string, FrozenDictionary<string, string>> SecretsCache = new();
-        private static readonly AmazonSecretsManagerClient Client = new(RegionEndpoint.USEast1);
+        private static readonly AmazonSecretsManagerClient Client;
+
+        static AwsSmService()
+        {
+            // AOT workaround, see https://github.com/aws/aws-sdk-net/issues/3153
+            GlobalRuntimeDependencyRegistry.Instance.RegisterSecurityTokenServiceClient(_ => new AmazonSecurityTokenServiceClient(
+                new AnonymousAWSCredentials(),
+                RegionEndpoint.USEast1
+            ));
+            Client = new();
+        }
 
         public static async ValueTask<string> GetSecretValueAsync(string arnOrId, string keyInsideSecret, CancellationToken cancellationToken)
         {

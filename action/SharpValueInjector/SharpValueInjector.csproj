@@ -5,10 +5,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PublishAot>false</PublishAot>
-    <StripSymbols>false</StripSymbols>
-    <PublishSingleFile>false</PublishSingleFile>
-    <SelfContained>false</SelfContained>
+    <PublishAot>true</PublishAot>
+    <StripSymbols>true</StripSymbols>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
@@ -17,7 +17,7 @@
   <ItemGroup>
     <RdXmlFile Include="rd.xml" />
     <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.400.53" />
-    <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.401.7" />
+    <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.401.8" />
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.0-preview2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
