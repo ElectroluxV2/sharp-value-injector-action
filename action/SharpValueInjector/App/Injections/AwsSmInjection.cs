@@ -87,7 +87,7 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
             {
                 var value = await client.GetSecretValueAsync(new()
                 {
-                    SecretId = arnOrId + "chuj",
+                    SecretId = arnOrId,
                 }, cancellationToken);
 
                 // TODO: Handle other secret types
