@@ -130,7 +130,7 @@ root.SetHandler(async context =>
                 ParameterType = new Color(46, 204, 64),
                 // clrs.cc: orange
                 ParameterName = new Color(255, 133, 27),
-                // clrs.cc: fushia
+                // clrs.cc: fuchsia
                 Parenthesis = new Color(240, 18, 190),
                 // clrs.cc: yellow
                 Path = new(new Color(255, 220, 0), Color.Default, Decoration.Bold),
