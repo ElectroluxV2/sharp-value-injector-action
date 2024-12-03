@@ -112,8 +112,8 @@ root.SetHandler(async context =>
             Interactive = InteractionSupport.No,
         });
 
-        // Obtained by looking at full screen logs at 1080p screen resolution
-        console.Profile.Width = 200;
+        // Do not wrap lines, as github actions log viewer will break them second time
+        console.Profile.Width = 2000;
 
         console.WriteException(ex, new ExceptionSettings
         {
