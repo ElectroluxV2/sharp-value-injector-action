@@ -105,7 +105,43 @@ root.SetHandler(async context =>
     }
     catch (Exception ex)
     {
-        AnsiConsole.WriteException(ex);
+        var console = AnsiConsole.Create(new()
+        {
+            Ansi = AnsiSupport.Yes,
+            ColorSystem = ColorSystemSupport.TrueColor,
+            Interactive = InteractionSupport.No,
+        });
+
+        // Obtained by looking at full screen logs at 1080p screen resolution
+        console.Profile.Width = 200;
+
+        console.WriteException(ex, new ExceptionSettings
+        {
+            Format = ExceptionFormats.ShortenEverything,
+            Style = new()
+            {
+                // clrs.cc: red
+                Message = new(new Color(255, 64, 54), Color.Default, Decoration.Bold),
+                // clrs.cc: maroon
+                Exception = new(new Color(133, 20, 75), Color.Default, Decoration.Italic | Decoration.Underline),
+                // clrs.cc: lime
+                Method = new Color(1, 255, 112),
+                // clrs.cc: green
+                ParameterType = new Color(46, 204, 64),
+                // clrs.cc: orange
+                ParameterName = new Color(255, 133, 27),
+                // clrs.cc: aqua
+                Parenthesis = new Color(127, 219, 255),
+                // clrs.cc: yellow
+                Path = new(new Color(255, 220, 0), Color.Default, Decoration.Bold),
+                // clrs.cc: blue
+                LineNumber = new Color(0, 116, 217),
+                // clrs.cc: silver
+                Dimmed = new(new Color(221, 221, 221), Color.Default, Decoration.Italic),
+                // clrs.cc: silver
+                NonEmphasized = new Color(221, 221, 221),
+            },
+        });
         context.ExitCode = 1;
     }
 });
