@@ -49,7 +49,7 @@ public class InjectorApp(
                 loggerConfiguration.WriteTo.Console(
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level:l}] {SourceContext}{NewLine}=>{Scope:l} {Message:lj}{NewLine}{Exception}{NewLine}",
                     applyThemeToRedirectedOutput: true,
-                    theme: AnsiConsoleTheme.Literate
+                    theme: AnsiConsoleTheme.Code
                 );
 
                 loggerConfiguration.Enrich.With(new ScopePathSerilogEnricher());
