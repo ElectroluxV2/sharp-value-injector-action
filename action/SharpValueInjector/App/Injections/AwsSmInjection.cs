@@ -12,35 +12,51 @@ namespace SharpValueInjector.App.Injections;
 
 public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjection
 {
+    // TODO: Get the fuck out with this rubbish AWS SDK and write a custom typed http client
     private static class AwsSmService
     {
         private static readonly ConcurrentDictionary<string, FrozenDictionary<string, string>> SecretsCache = new();
-        private static readonly AmazonSecretsManagerClient Client;
 
-        static AwsSmService()
+        private static class AwsSmClientFactory
         {
-            // AOT workaround, see https://github.com/aws/aws-sdk-net/issues/3153
-            GlobalRuntimeDependencyRegistry.Instance.RegisterSecurityTokenServiceClient(_ => new AmazonSecurityTokenServiceClient(
-                new AnonymousAWSCredentials()
-            ));
+            // Used for short secret ids
+            private static readonly AmazonSecretsManagerClient DefaultRegionClient;
+            // Used for full arn secret ids
+            private static readonly ConcurrentDictionary<string, AmazonSecretsManagerClient> PerRegionClients = new();
 
-            Console.Out.WriteLine("region1 = {0}", Amazon.Util.EC2InstanceMetadata.Region.DisplayName);
-            Console.Out.WriteLine("region2 = {0}", RegionEndpoint.USEast1);
-            Console.Out.WriteLine("region3 = {0}", Environment.GetEnvironmentVariable("AWS_REGION"));
-            Console.Out.WriteLine("region4 = {0}", Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION"));
-            Console.Out.WriteLine("region5 = {0}", Environment.GetEnvironmentVariable("AWS_PROFILE"));
+            static AwsSmClientFactory()
+            {
+                // AOT workaround, see https://github.com/aws/aws-sdk-net/issues/3153
+                GlobalRuntimeDependencyRegistry.Instance.RegisterSecurityTokenServiceClient(_ => new AmazonSecurityTokenServiceClient(
+                    new AnonymousAWSCredentials()
+                ));
 
-            Client = new(Amazon.Util.EC2InstanceMetadata.Region);
+                // This will create client in region specified in AWS_REGION, AWS_DEFAULT_REGION or AWS_PROFILE environment variable
+                DefaultRegionClient = new(Amazon.Util.EC2InstanceMetadata.Region);
+            }
+
+            public static AmazonSecretsManagerClient GetClientForRegion(string? region)
+            {
+                if (region is null) return DefaultRegionClient;
+
+                if (PerRegionClients.TryGetValue(region, out var client))
+                {
+                    return client;
+                }
+
+                var newClient = new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(region));
+                PerRegionClients[region] = newClient;
+                return newClient;
+            }
         }
+
 
         public static async ValueTask<string> GetSecretValueAsync(string arnOrId, string keyInsideSecret, CancellationToken cancellationToken)
         {
             return await InternalGetSecretValueAsync(arnOrId, keyInsideSecret, cancellationToken) ?? throw new InvalidDataException($"Aws Secret: `{arnOrId}` does not contain the specified key: '{keyInsideSecret}'");
         }
 
-        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Types are present")]
-        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "works on my laptop")]
-        private static async Task<string?> InternalGetSecretValueAsync(string arnOrId, string keyInsideSecret, CancellationToken cancellationToken)
+        private static async ValueTask<string?> InternalGetSecretValueAsync(string arnOrId, string keyInsideSecret, CancellationToken cancellationToken)
         {
             if (SecretsCache.TryGetValue(arnOrId, out var secret))
             {
@@ -63,7 +79,11 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
 
         private static async ValueTask<string?> GetSecretAsync(string arnOrId, CancellationToken cancellationToken)
         {
-            var value = await Client.GetSecretValueAsync(new()
+            var regionFromArn = arnOrId.Split(':').ElementAtOrDefault(3);
+            var client = AwsSmClientFactory.GetClientForRegion(regionFromArn);
+
+
+            var value = await client.GetSecretValueAsync(new()
             {
                 SecretId = arnOrId,
             }, cancellationToken);
@@ -76,18 +96,3 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
     public ValueTask<string> ProvisionInjectionValueAsync(CancellationToken cancellationToken) => AwsSmService.GetSecretValueAsync(ArnOrId, KeyInsideSecret, cancellationToken);
     public ValueTask<string> ProvisionLogValueAsync() => ValueTask.FromResult(ArnOrId);
 }
-
-// public static class AwsArnParser
-// {
-//     public static Range? ExtractRegionFrom(ReadOnlySpan<char> arnOrName)
-//     {
-//         if (!arnOrName.Contains(':')) return null;
-//
-//         var enumerator = arnOrName.Split(':'); // 0
-//         enumerator.MoveNext(); // 1
-//         enumerator.MoveNext(); // 2
-//         enumerator.MoveNext(); // 3
-//
-//         return enumerator.Current;
-//     }
-// }
