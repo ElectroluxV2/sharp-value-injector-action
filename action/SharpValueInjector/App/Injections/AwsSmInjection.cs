@@ -24,7 +24,7 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
                 new AnonymousAWSCredentials(),
                 RegionEndpoint.USEast1
             ));
-            Client = new();
+            Client = new(RegionEndpoint.USEast1);
         }
 
         public static async ValueTask<string> GetSecretValueAsync(string arnOrId, string keyInsideSecret, CancellationToken cancellationToken)
