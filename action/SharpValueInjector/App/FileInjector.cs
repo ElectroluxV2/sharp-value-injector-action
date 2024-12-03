@@ -10,10 +10,10 @@ public class FileInjector(ILogger<FileInjector> logger)
         try
         {
             logger.LogInformation("Injecting values into file {Path}", path);
+            using (logger.BeginScope(Path.GetFileName(path)));
+
             using var reader = File.OpenText(path);
             await using var writer = File.CreateText($"{path}.injected");
-
-            using var s = logger.BeginScope(Path.GetFileName(path));
 
             while (!reader.EndOfStream)
             {
