@@ -24,7 +24,7 @@ public class FileInjector(ILogger<FileInjector> logger)
                 var sb = new StringBuilder(line);
                 foreach (var key in injections)
                 {
-                    logger.LogTrace("Trying: {key}", key);
+                    logger.LogTrace("Trying: {Key}", key);
                     sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
                 }
 
