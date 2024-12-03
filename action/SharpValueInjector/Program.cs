@@ -125,7 +125,7 @@ root.SetHandler(async context =>
                 // clrs.cc: blue
                 Exception = new(new Color(127, 219, 255), Color.Default, Decoration.Bold),
                 // clrs.cc: blue
-                Method = new Color(0, 116, 217),
+                Method = new(new Color(0, 116, 217), Color.Default, Decoration.Bold),
                 // clrs.cc: green
                 ParameterType = new Color(46, 204, 64),
                 // clrs.cc: orange
@@ -138,8 +138,8 @@ root.SetHandler(async context =>
                 LineNumber = new Color(0, 116, 217),
                 // clrs.cc: silver
                 Dimmed = new(new Color(221, 221, 221), Color.Default, Decoration.Italic),
-                // clrs.cc: blue
-                NonEmphasized = new(new Color(127, 219, 255), Color.Default, Decoration.Bold),
+                // clrs.cc: aqua
+                NonEmphasized = new Color(127, 219, 255),
             },
         });
         context.ExitCode = 1;
