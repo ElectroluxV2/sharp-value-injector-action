@@ -113,7 +113,7 @@ root.SetHandler(async context =>
         });
 
         // Obtained by looking at full screen logs at 1080p screen resolution
-        console.Profile.Width = int.MaxValue;
+        console.Profile.Width = 500;
 
         console.WriteException(ex, new ExceptionSettings
         {
