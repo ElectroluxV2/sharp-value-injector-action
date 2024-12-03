@@ -26,6 +26,9 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
 
             Console.Out.WriteLine("region1 = {0}", Amazon.Util.EC2InstanceMetadata.Region.DisplayName);
             Console.Out.WriteLine("region2 = {0}", RegionEndpoint.USEast1);
+            Console.Out.WriteLine("region3 = {0}", Environment.GetEnvironmentVariable("AWS_REGION"));
+            Console.Out.WriteLine("region4 = {0}", Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION"));
+            Console.Out.WriteLine("region5 = {0}", Environment.GetEnvironmentVariable("AWS_PROFILE"));
 
             Client = new(Amazon.Util.EC2InstanceMetadata.Region);
         }
