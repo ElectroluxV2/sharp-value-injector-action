@@ -5,11 +5,13 @@ namespace SharpValueInjector.App;
 
 public class FileInjector(ILogger<FileInjector> logger)
 {
-    public async ValueTask InjectAsync(string path, string openingToken, string closingToken, IDictionary<string, string> injections, CancellationToken cancellationToken)
+    public async ValueTask InjectAsync(string path, string openingToken, string closingToken, ISet<string> injections, Func<string, ValueTask<string>> injectionValueSupplier, CancellationToken cancellationToken)
     {
         try
         {
             logger.LogInformation("Injecting values into file {Path}", path);
+            using (logger.BeginScope(Path.GetFileName(path)));
+
             using var reader = File.OpenText(path);
             await using var writer = File.CreateText($"{path}.injected");
 
@@ -20,9 +22,10 @@ public class FileInjector(ILogger<FileInjector> logger)
 
                 // PERF: It should be possible to replace this within a single pass
                 var sb = new StringBuilder(line);
-                foreach (var (key, value) in injections)
+                foreach (var key in injections)
                 {
-                    sb.Replace($"{openingToken}{key}{closingToken}", value.AsSpan());
+                    logger.LogTrace("Trying: {Key}", key);
+                    sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
                 }
 
                 await writer.WriteLineAsync(sb.ToString());

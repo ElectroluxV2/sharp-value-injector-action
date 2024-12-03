@@ -8,4 +8,8 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.1.0" />
+  </ItemGroup>
+
 </Project>

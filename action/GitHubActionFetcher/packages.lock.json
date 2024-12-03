@@ -14,8 +14,16 @@
         "resolved": "9.0.0-rc.1.24431.7",
         "contentHash": "B8jHIIszeUdDY+O4G1/xPOuhrriwsv9Z8/u3XSOAqc8Z0mQCeLBKg2oLGElDZeRF8wWXDGklAKY3f0IHopyXkQ=="
       },
+      "Serilog": {
+        "type": "Transitive",
+        "resolved": "4.1.0",
+        "contentHash": "u1aZI8HZ62LWlq5dZLFwm6jMax/sUwnWZSw5lkPsCt518cJBxFKoNmc7oSxe5aA5BgSkzy9rzwFGR/i/acnSPw=="
+      },
       "shared": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Serilog": "[4.1.0, )"
+        }
       }
     },
     "net9.0/linux-arm64": {
