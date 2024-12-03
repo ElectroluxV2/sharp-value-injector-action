@@ -113,7 +113,7 @@ root.SetHandler(async context =>
         });
 
         // Obtained by looking at full screen logs at 1080p screen resolution
-        console.Profile.Width = 200;
+        console.Profile.Width = int.MaxValue;
 
         console.WriteException(ex, new ExceptionSettings
         {
@@ -123,7 +123,7 @@ root.SetHandler(async context =>
                 // clrs.cc: red
                 Message = new(new Color(255, 64, 54), Color.Default, Decoration.Bold),
                 // clrs.cc: maroon
-                Exception = new(new Color(133, 20, 75), Color.Default, Decoration.Italic | Decoration.Underline),
+                Exception = new(new Color(127, 219, 255), Color.Default, Decoration.Italic | Decoration.Underline),
                 // clrs.cc: lime
                 Method = new Color(1, 255, 112),
                 // clrs.cc: green
