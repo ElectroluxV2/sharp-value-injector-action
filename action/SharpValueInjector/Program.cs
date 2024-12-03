@@ -139,7 +139,7 @@ root.SetHandler(async context =>
                 // clrs.cc: silver
                 Dimmed = new(new Color(221, 221, 221), Color.Default, Decoration.Italic),
                 // clrs.cc: blue
-                NonEmphasized = new Color(127, 219, 255),
+                NonEmphasized = new(new Color(127, 219, 255), Color.Default, Decoration.Bold),
             },
         });
         context.ExitCode = 1;
