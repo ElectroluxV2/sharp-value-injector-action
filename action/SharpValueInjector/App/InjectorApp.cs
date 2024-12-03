@@ -47,7 +47,7 @@ public class InjectorApp(
                 loggerConfiguration.MinimumLevel.Is((LogEventLevel) logLevel);
 
                 loggerConfiguration.WriteTo.Console(
-                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:l}] {SourceContext}{NewLine}=>{Scope:l} {Message:lj}{NewLine}{Exception}{NewLine}",
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:l}] {SourceContext}{NewLine}=>{Scope:l} {Message:lj}{NewLine}{Exception}",
                     applyThemeToRedirectedOutput: true,
                     theme: AnsiConsoleTheme.Code
                 );
