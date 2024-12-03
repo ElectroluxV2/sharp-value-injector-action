@@ -122,8 +122,8 @@ root.SetHandler(async context =>
             {
                 // clrs.cc: red
                 Message = new(new Color(255, 64, 54), Color.Default, Decoration.Bold),
-                // clrs.cc: blue
-                Exception = new(new Color(127, 219, 255), Color.Default, Decoration.Bold),
+                // clrs.cc: teal
+                Exception = new(new Color(57, 204, 204), Color.Default, Decoration.Bold),
                 // clrs.cc: blue
                 Method = new(new Color(0, 116, 217), Color.Default, Decoration.Bold),
                 // clrs.cc: green
