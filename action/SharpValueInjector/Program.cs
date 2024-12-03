@@ -123,15 +123,15 @@ root.SetHandler(async context =>
                 // clrs.cc: red
                 Message = new(new Color(255, 64, 54), Color.Default, Decoration.Bold),
                 // clrs.cc: blue
-                Exception = new(new Color(127, 219, 255), Color.Default, Decoration.Italic | Decoration.Underline),
+                Exception = new(new Color(127, 219, 255), Color.Default, Decoration.Bold),
                 // clrs.cc: blue
                 Method = new Color(0, 116, 217),
                 // clrs.cc: green
                 ParameterType = new Color(46, 204, 64),
                 // clrs.cc: orange
                 ParameterName = new Color(255, 133, 27),
-                // clrs.cc: aqua
-                Parenthesis = new Color(127, 219, 255),
+                // clrs.cc: fushia
+                Parenthesis = new Color(240, 18, 190),
                 // clrs.cc: yellow
                 Path = new(new Color(255, 220, 0), Color.Default, Decoration.Bold),
                 // clrs.cc: blue
