@@ -12,7 +12,6 @@ public class ScopePathSerilogEnricher : ILogEventEnricher
     /// <param name="propertyFactory"></param>
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
-        // Console.Out.WriteLine("logEvent.Properties. = {0}", logEvent.Properties["SourceContext"]);
         if (!logEvent.Properties.TryGetValue("Scope", out var sourceContextValue)) return;
         
         var joinedValue = string.Join('.', ExpandOut(sourceContextValue).Select(e => e.ToString("l", null)));
