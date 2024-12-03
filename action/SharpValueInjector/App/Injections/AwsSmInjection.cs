@@ -21,10 +21,9 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
         {
             // AOT workaround, see https://github.com/aws/aws-sdk-net/issues/3153
             GlobalRuntimeDependencyRegistry.Instance.RegisterSecurityTokenServiceClient(_ => new AmazonSecurityTokenServiceClient(
-                new AnonymousAWSCredentials(),
-                RegionEndpoint.USEast1
+                new AnonymousAWSCredentials()
             ));
-            Client = new(RegionEndpoint.USEast1);
+            Client = new(Amazon.Util.EC2InstanceMetadata.Region);
         }
 
         public static async ValueTask<string> GetSecretValueAsync(string arnOrId, string keyInsideSecret, CancellationToken cancellationToken)
