@@ -7,7 +7,7 @@ using SharpValueInjector.App.Injections;
 
 namespace SharpValueInjector.App;
 
-public class HierarchicalPlainTextInjectionsResolver(ILogger<HierarchicalPlainTextInjectionsResolver> logger, JsonSlurp jsonSlurp)
+public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolver> logger, JsonSlurp jsonSlurp)
 {
     public async Task<FrozenDictionary<string, IInjection>> ResolveAsync(IReadOnlyCollection<Stream> variableFiles, IReadOnlyCollection<Stream> secretFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {

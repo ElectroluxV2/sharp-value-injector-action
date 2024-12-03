@@ -16,7 +16,7 @@ public class InjectorApp(
     SharpValueInjectionConfiguration configuration,
     FileOrDirectoryWithPatternResolver fileOrDirectoryWithPatternResolver,
     DirectoryWalker directoryWalker,
-    HierarchicalPlainTextInjectionsResolver hierarchicalInjectionsResolver,
+    HierarchicalInjectionsResolver hierarchicalInjectionsResolver,
     FileInjector fileInjector,
     FileFetcher fileFetcher,
     ConsoleCancellationToken consoleCancellationToken
@@ -58,7 +58,7 @@ public class InjectorApp(
             .AddSingleton<InjectorApp>()
             .AddTransient<JsonSlurp>()
             .AddTransient<FileInjector>()
-            .AddTransient<HierarchicalPlainTextInjectionsResolver>()
+            .AddTransient<HierarchicalInjectionsResolver>()
             .AddTransient<DirectoryWalker>()
             .AddTransient<FileOrDirectoryWithPatternResolver>()
             .AddTransient<UriMapper>()
