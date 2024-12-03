@@ -23,6 +23,10 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
             GlobalRuntimeDependencyRegistry.Instance.RegisterSecurityTokenServiceClient(_ => new AmazonSecurityTokenServiceClient(
                 new AnonymousAWSCredentials()
             ));
+
+            Console.Out.WriteLine("region1 = {0}", Amazon.Util.EC2InstanceMetadata.Region.DisplayName);
+            Console.Out.WriteLine("region2 = {0}", RegionEndpoint.USEast1);
+
             Client = new(Amazon.Util.EC2InstanceMetadata.Region);
         }
 
