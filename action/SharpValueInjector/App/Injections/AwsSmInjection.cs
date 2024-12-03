@@ -6,6 +6,7 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.RuntimeDependencies;
 using Amazon.SecretsManager;
+using Amazon.SecretsManager.Model;
 using Amazon.SecurityToken;
 
 namespace SharpValueInjector.App.Injections;
@@ -82,14 +83,21 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
             var regionFromArn = arnOrId.Split(':').ElementAtOrDefault(3);
             var client = AwsSmClientFactory.GetClientForRegion(regionFromArn);
 
-
-            var value = await client.GetSecretValueAsync(new()
+            try
             {
-                SecretId = arnOrId,
-            }, cancellationToken);
+                var value = await client.GetSecretValueAsync(new()
+                {
+                    SecretId = arnOrId,
+                }, cancellationToken);
 
-            // TODO: Handle other secret types
-            return value?.SecretString;
+                // TODO: Handle other secret types
+                return value?.SecretString;
+            }
+            catch (ResourceNotFoundException exception)
+            {
+                // AWS SDK did not care to say what secret was not found
+                throw new AggregateException($"Secret `{arnOrId}` not found", exception);
+            }
         }
     }
 
