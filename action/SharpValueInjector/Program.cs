@@ -113,11 +113,11 @@ root.SetHandler(async context =>
         });
 
         // Obtained by looking at full screen logs at 1080p screen resolution
-        console.Profile.Width = 500;
+        console.Profile.Width = 200;
 
         console.WriteException(ex, new ExceptionSettings
         {
-            Format = ExceptionFormats.ShortenEverything,
+            Format = ExceptionFormats.ShowLinks,
             Style = new()
             {
                 // clrs.cc: red
