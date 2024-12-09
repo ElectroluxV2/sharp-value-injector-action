@@ -11,7 +11,7 @@ inputs:
   secrets:
     description: "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain secrets to inject into target files. To specify multiple files, separate them with new line or ';'. Order matters when resolving conflicts."
     required: false
-  passthrough:
+  pass-through:
     description: "Keys to resolve and pass through to 'resolved' Action output."
     required: false
   recurse-subdirectories:
@@ -81,4 +81,4 @@ runs:
       SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
       SVI_LOG_LEVEL: ${{ inputs.log-level }}
       GITHUB_ACTIONS_PATH: "${{ runner.temp }}/../_actions"
-      SVI_PASSTHROUGH: ${{ inputs.passthrough }}
+      SVI_PASSTHROUGH: ${{ inputs.pass-through }}
