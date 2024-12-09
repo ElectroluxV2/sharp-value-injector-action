@@ -11,6 +11,9 @@ inputs:
   secrets:
     description: "Path to JSON file or directories to scan (may contain file name patterns such as '/sample/path/*.json'.) that contain secrets to inject into target files. To specify multiple files, separate them with new line or ';'. Order matters when resolving conflicts."
     required: false
+  passthrough:
+    description: "Keys to resolve and pass through to 'resolved' Action output."
+    required: false
   recurse-subdirectories:
     description: "Weather to scan subdirectories of the given directories."
     required: false
@@ -31,6 +34,10 @@ inputs:
     description: "The minimum level of logs to output."
     required: false
     default: "Information"
+outputs:
+  resolved:
+    description: "Resolved values for keys specified in 'passthrough' input in format of JSON string to string dictionary."
+    value: ${{ steps.main.outputs.resolved }}
 
 runs:
   using: "composite"
@@ -59,6 +66,7 @@ runs:
     if: ${{ contains(inputs.variables, '$') || contains(inputs.secrets, '$') }} # '$' is separator in input file path indicating that it is a composite action.
 
   - name: "Sharp Value Injector"
+    id: main
     # language=sh
     run: |
       dotnet run --project "${GITHUB_ACTION_PATH}/SharpValueInjector/SharpValueInjector.csproj"
@@ -73,3 +81,4 @@ runs:
       SVI_CLOSING_TOKEN: ${{ inputs.closing-token }}
       SVI_LOG_LEVEL: ${{ inputs.log-level }}
       GITHUB_ACTIONS_PATH: "${{ runner.temp }}/../_actions"
+      SVI_PASSTHROUGH: ${{ inputs.passthrough }}

@@ -8,5 +8,7 @@ public record SharpValueInjectionConfiguration(
     bool IgnoreCase,
     string OpeningToken,
     string ClosingToken,
-    string GithubActionsPath
+    string GithubActionsPath,
+    string GithubOutputPath,
+    string[] Passthrough
 );
