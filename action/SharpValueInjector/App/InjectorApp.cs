@@ -170,6 +170,7 @@ public class InjectorApp(
             if (!injectionKeySet.Contains(key))
             {
                 table.AddRow(new Markup(key), new Markup("No injection found!", new(Color.LightCoral)));
+                passthroughOutput[key] = "<undefined>";
                 continue;
             }
 
@@ -187,8 +188,8 @@ public class InjectorApp(
         console.Write(grid);
 
         var json = JsonSerializer.Serialize(passthroughOutput, SourceGenerationContext.Default.DictionaryStringString);
-        var text = $"resolved={json}";
+        var text = $"resolved<<EOF\n{json}\nEOF";
 
-        await File.WriteAllTextAsync(configuration.GithubOutputPath, text, consoleCancellationToken);
+        await File.AppendAllTextAsync(configuration.GithubOutputPath, text, consoleCancellationToken);
     }
 }
