@@ -52,6 +52,18 @@ var githubActionsPathOption = new Option<string>(
     "For example /gha/_work/_actions, used to resolve composite action references."
 );
 
+var githubOutputPathOption = new Option<string>(
+    "--github-output-path",
+    () => Environment.GetEnvironmentVariable("GITHUB_OUTPUT") ?? string.Empty,
+    "For example `/<random guid>/outputs`, used to write GHA output to."
+);
+
+var passthroughOption = new Option<string[]>(
+    "--passthrough",
+    () => ArrayFromEnv("SVI_PASSTHROUGH"),
+    "Keys to resolve and pass through to the GitHub Actions output."
+);
+
 var logLevelOption = new Option<LogLevel>(
     "--log-level",
     () => Enum.Parse<LogLevel>(Environment.GetEnvironmentVariable("SVI_LOG_LEVEL") ?? "Information"),
@@ -68,6 +80,8 @@ var root = new RootCommand("Injects values from given inputs into given files. S
     openingTokenOption,
     closingTokenOption,
     githubActionsPathOption,
+    githubOutputPathOption,
+    passthroughOption,
     logLevelOption,
 };
 
@@ -81,6 +95,8 @@ root.SetHandler(async context =>
     var openingToken = context.ParseResult.GetValueForOption(openingTokenOption)!;
     var closingToken = context.ParseResult.GetValueForOption(closingTokenOption)!;
     var githubActionsPath = context.ParseResult.GetValueForOption(githubActionsPathOption)!;
+    var githubOutputPath = context.ParseResult.GetValueForOption(githubOutputPathOption)!;
+    var passthrough = context.ParseResult.GetValueForOption(passthroughOption)!;
     var logLevel = context.ParseResult.GetValueForOption(logLevelOption);
 
     try
@@ -95,6 +111,8 @@ root.SetHandler(async context =>
             openingToken,
             closingToken,
             githubActionsPath,
+            githubOutputPath,
+            passthrough,
             logLevel,
             cancellationToken
         );

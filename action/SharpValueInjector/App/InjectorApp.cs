@@ -1,5 +1,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -8,6 +11,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 using Shared;
 using SharpValueInjector.App.Functions;
 using SharpValueInjector.App.Injections;
+using Spectre.Console;
 
 namespace SharpValueInjector.App;
 
@@ -36,11 +40,11 @@ public class InjectorApp(
         return resolved;
     }
 
-    public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] variableFiles, string[] secretFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static ServiceProvider BuildServiceProvider(string[] outputFiles, string[] variableFiles, string[] secretFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPathOption, string githubOutputPath, string[] passthrough, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
         return new ServiceCollection()
             .AddSingleton(new ConsoleCancellationToken(cancellationToken))
-            .AddSingleton(new SharpValueInjectionConfiguration(outputFiles, variableFiles, secretFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption))
+            .AddSingleton(new SharpValueInjectionConfiguration(outputFiles, variableFiles, secretFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPathOption, githubOutputPath, passthrough))
             .AddLogging()
             .AddSerilog(loggerConfiguration =>
             {
@@ -67,9 +71,9 @@ public class InjectorApp(
             .BuildServiceProvider();
     }
 
-    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] variableFiles, string[] secretFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPath, LogLevel logLevel, CancellationToken cancellationToken = default)
+    public static async Task<int> BootstrapAsync(string[] outputFiles, string[] variableFiles, string[] secretFiles, bool recurseSubdirectories, bool ignoreCase, string openingToken, string closingToken, string githubActionsPath, string githubOutputPath, string[] passthrough, LogLevel logLevel, CancellationToken cancellationToken = default)
     {
-        var serviceProvider = BuildServiceProvider(outputFiles, variableFiles, secretFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPath, logLevel, cancellationToken);
+        var serviceProvider = BuildServiceProvider(outputFiles, variableFiles, secretFiles, recurseSubdirectories, ignoreCase, openingToken, closingToken, githubActionsPath, githubOutputPath, passthrough, logLevel, cancellationToken);
         return await serviceProvider.GetRequiredService<InjectorApp>().RunAsync();
     }
 
@@ -120,7 +124,73 @@ public class InjectorApp(
         await outputFiles
             .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, valueSupplier, consoleCancellationToken))
             .ToArrayAsync(consoleCancellationToken);
-        
+
+        await HandlePassthroughAsync(injectionKeySet, valueSupplier);
+
         return 0;
+    }
+
+    private async Task HandlePassthroughAsync(FrozenSet<string> injectionKeySet, Func<string, ValueTask<string>> valueSupplier)
+    {
+        if (configuration.Passthrough.Length == 0)
+        {
+            logger.LogInformation("No passthrough keys to handle");
+            return;
+        }
+
+        var console = AnsiConsole.Create(new()
+        {
+            Ansi = AnsiSupport.Yes,
+            ColorSystem = ColorSystemSupport.TrueColor,
+            Interactive = InteractionSupport.No,
+        });
+
+        // 1080p full screen
+        console.Profile.Width = 200;
+
+        var table = new Table
+        {
+            Border = TableBorder.Horizontal,
+        };
+
+        table.AddColumns(
+            new TableColumn("Key")
+            {
+                NoWrap = true,
+            }, new TableColumn("Value")
+            {
+                NoWrap = true,
+            }
+        );
+
+
+        var passthroughOutput = new Dictionary<string, string>();
+        const string undefined = "<undefined>";
+        foreach (var key in configuration.Passthrough)
+        {
+            if (!injectionKeySet.Contains(key))
+            {
+                table.AddRow(new Markup(key), new Markup(undefined, new(Color.LightCoral)));
+                passthroughOutput[key] = undefined;
+                continue;
+            }
+
+            var value = await valueSupplier(key);
+            passthroughOutput[key] = value;
+
+            table.AddRow(new Markup(key), new Markup(value, new(Color.Green)));
+        }
+
+        var grid = new Grid();
+        grid.AddColumn();
+        grid.AddRow(new Markup("Passthrough", Color.LightCyan3).Centered());
+        grid.AddRow(table);
+
+        console.Write(grid);
+
+        var json = JsonSerializer.Serialize(passthroughOutput, SourceGenerationContext.Default.DictionaryStringString);
+        var text = $"resolved<<EOF\n{json}\nEOF";
+
+        await File.AppendAllTextAsync(configuration.GithubOutputPath, text, consoleCancellationToken);
     }
 }
