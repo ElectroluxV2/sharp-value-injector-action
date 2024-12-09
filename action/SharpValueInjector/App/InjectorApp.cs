@@ -169,7 +169,7 @@ public class InjectorApp(
         {
             if (!injectionKeySet.Contains(key))
             {
-                table.AddRow(new Markup(key), new Markup("No injection found!", new(Color.Red)));
+                table.AddRow(new Markup(key), new Markup("No injection found!", new(Color.LightCoral)));
                 continue;
             }
 
@@ -181,7 +181,7 @@ public class InjectorApp(
 
         var grid = new Grid();
         grid.AddColumn();
-        grid.AddRow(new Markup("Passthrough", Color.LightCoral).Centered());
+        grid.AddRow(new Markup("Passthrough", Color.LightCyan3).Centered());
         grid.AddRow(table);
 
         console.Write(grid);
