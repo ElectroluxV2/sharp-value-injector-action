@@ -165,12 +165,13 @@ public class InjectorApp(
 
 
         var passthroughOutput = new Dictionary<string, string>();
+        const string undefined = "<undefined>";
         foreach (var key in configuration.Passthrough)
         {
             if (!injectionKeySet.Contains(key))
             {
-                table.AddRow(new Markup(key), new Markup("No injection found!", new(Color.LightCoral)));
-                passthroughOutput[key] = "<undefined>";
+                table.AddRow(new Markup(key), new Markup(undefined, new(Color.LightCoral)));
+                passthroughOutput[key] = undefined;
                 continue;
             }
 
