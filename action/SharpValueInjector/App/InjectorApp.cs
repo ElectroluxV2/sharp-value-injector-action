@@ -179,7 +179,12 @@ public class InjectorApp(
             table.AddRow(new Markup(key), new Markup(value, new(Color.Green)));
         }
 
-        console.Write(table);
+        var grid = new Grid();
+        grid.AddColumn();
+        grid.AddRow(new Markup("Passthrough", Color.LightCoral).Centered());
+        grid.AddRow(table);
+
+        console.Write(grid);
 
         var json = JsonSerializer.Serialize(passthroughOutput, SourceGenerationContext.Default.DictionaryStringString);
         var text = $"resolved={json}";
