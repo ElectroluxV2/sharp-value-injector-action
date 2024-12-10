@@ -120,7 +120,17 @@ public class InjectorApp(
             .WalkAsync(outputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)
             .Concat(outputFilesFromConfiguration.ToAsyncEnumerable());
 
-        // Concurrent inject
+        // Concurrency does not make sense here, as it would block frequently on injection reading (shared cache)
+        // Additionally, we do not make much of overhead on top of reading from drive so it really is bottlenecked by filesystem
+
+        // Okay I have no idea, but this:
+        // ```
+        // await foreach (var outputFile in outputFiles)
+        // {
+        //     await fileInjector.InjectAsync(outputFile, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, valueSupplier, consoleCancellationToken);
+        // }
+        // ```
+        // is equivalent to code below BUT it fucking sucks performance-wide
         await outputFiles
             .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, valueSupplier, consoleCancellationToken))
             .ToArrayAsync(consoleCancellationToken);

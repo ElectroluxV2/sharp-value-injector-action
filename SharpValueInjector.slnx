@@ -3,10 +3,11 @@
     <File Path="action/action.yml" />
     <File Path=".github/workflows/main.yml" />
   </Folder>
-  <Project Path="action/SharpValueInjector/SharpValueInjector.csproj" />
-  <Project Path="action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj" />
   <Project Path="action/GitHubActionFetcher.Tests/GitHubActionFetcher.Tests.csproj" Type="Classic C#" />
   <Project Path="action/GitHubActionFetcher/GitHubActionFetcher.csproj" Type="Classic C#" />
   <Project Path="action/Shared.Tests/Shared.Tests.csproj" Type="Classic C#" />
   <Project Path="action/Shared/Shared.csproj" Type="Classic C#" />
+  <Project Path="action/SharpValueInjector.Tests/SharpValueInjector.Tests.csproj" />
+  <Project Path="action/SharpValueInjector/SharpValueInjector.csproj" />
+  <Project Path="Benchmarks\Benchmarks.csproj" Type="Classic C#" />
 </Solution>

@@ -99,7 +99,14 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
                 var stringBuilder = new StringBuilder(value);
                 foreach (var refKey in matches.Select(x => x.Groups["ref"].Value))
                 {
-                    stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", provider.GetRequiredKeyedService<string>(refKey));
+                    var dependency = provider.GetKeyedService<string>(refKey);
+                    if (dependency == null)
+                    {
+                        logger.LogWarning("Dependency not found for key {Key}", refKey);
+                        return $"Error: Missing dependency `{refKey}` for key `{key}`!";
+                    }
+
+                    stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", dependency);
                 }
 
                 return stringBuilder.ToString();
@@ -112,7 +119,6 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
         return conflictlessInjections.Keys
             .ToFrozenDictionary<string, string, IInjection>(
                 injectionKey => injectionKey,
-                injectionKey => new PlainTextInjection(serviceProvider.GetRequiredKeyedService<string>(injectionKey))
-            );
+                injectionKey => new PlainTextInjection(serviceProvider.GetRequiredKeyedService<string>(injectionKey)));
     }
 }
