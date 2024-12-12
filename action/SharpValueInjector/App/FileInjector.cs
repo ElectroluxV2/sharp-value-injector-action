@@ -12,31 +12,33 @@ public class FileInjector(ILogger<FileInjector> logger)
             logger.LogInformation("Injecting values into file {Path}", path);
             using var _  = logger.BeginScope(Path.GetFileName(path));
 
-            using var reader = File.OpenText(path);
-            await using var writer = File.CreateText($"{path}.injected");
-
-            while (!reader.EndOfStream)
+            using (var reader = File.OpenText(path))
             {
-                var line = await reader.ReadLineAsync(cancellationToken);
-                if (line is null) break;
-
-                // PERF: It should be possible to replace this within a single pass
-                var sb = new StringBuilder(line);
-                foreach (var key in injections)
+                await using (var writer = File.CreateText($"{path}.injected"))
                 {
-                    logger.LogTrace("Trying: {Key}", key);
-                    sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
+                    while (!reader.EndOfStream)
+                    {
+                        var line = await reader.ReadLineAsync(cancellationToken);
+                        if (line is null) break;
+
+                        // PERF: It should be possible to replace this within a single pass
+                        var sb = new StringBuilder(line);
+                        foreach (var key in injections)
+                        {
+                            logger.LogTrace("Trying: {Key}", key);
+                            sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
+                        }
+
+                        await writer.WriteLineAsync(sb.ToString());
+                    }
+
+                    // reader.Close();
+                    // File.Delete(path);
+                    //
+                    // await writer.FlushAsync(cancellationToken);
+                    // writer.Close();
                 }
-
-                await writer.WriteLineAsync(sb.ToString());
             }
-
-            // reader.Close();
-            // File.Delete(path);
-            //
-            // await writer.FlushAsync(cancellationToken);
-            // writer.Close();
-
             File.Move($"{path}.injected", path, true);
         }
         catch (Exception e)
