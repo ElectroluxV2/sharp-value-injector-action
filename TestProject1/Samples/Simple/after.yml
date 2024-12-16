@@ -1,0 +1,3 @@
+cases:
+- name: "Simple value injection"
+  value: "Injected Value"

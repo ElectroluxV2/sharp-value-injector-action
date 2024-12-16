@@ -1,0 +1,4 @@
+cases:
+- name: "Numeric vales injection"
+  double: #{Double}
+  integer: #{Integer}

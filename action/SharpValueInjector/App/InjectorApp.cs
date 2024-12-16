@@ -125,7 +125,7 @@ public class InjectorApp(
             .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, valueSupplier, consoleCancellationToken))
             .ToArrayAsync(consoleCancellationToken);
 
-        await HandlePassthroughAsync(injectionKeySet, valueSupplier);
+        // await HandlePassthroughAsync(injectionKeySet, valueSupplier);
 
         return 0;
     }

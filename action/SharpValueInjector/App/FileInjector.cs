@@ -25,12 +25,17 @@ public class FileInjector(ILogger<FileInjector> logger)
                         var sb = new StringBuilder(line);
                         foreach (var key in injections)
                         {
-                            logger.LogTrace("Trying: {Key}", key);
+                            logger.LogCritical("Trying: {Key}", key);
                             sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
                         }
 
                         await writer.WriteLineAsync(sb.ToString());
+                        await writer.FlushAsync(cancellationToken);
+                        await Task.Run(() => writer.Flush(), cancellationToken);
                     }
+
+
+
 
                     // reader.Close();
                     // File.Delete(path);

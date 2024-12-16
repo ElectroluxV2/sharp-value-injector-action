@@ -1,0 +1,4 @@
+cases:
+- name: "Boolean vales injection"
+  false: false
+  true: true
