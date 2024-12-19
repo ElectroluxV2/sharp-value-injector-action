@@ -105,14 +105,14 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
                         continue;
                     }
 
-                    try
+                    var refValue = provider.GetKeyedService<string>(refKey);
+                    if (refValue is null)
                     {
-                        stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", provider.GetRequiredKeyedService<string>(refKey));
+                        logger.LogError("Key {Key} has missing dependency: '{DependencyKey}', it will most likely resolve to broken injection", key, refKey);
+                        continue;
                     }
-                    catch (InvalidOperationException e)
-                    {
-                        throw new AggregateException($"Failed to resolve '{refKey}'", e);
-                    }
+
+                    stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", refValue);
                 }
 
                 return stringBuilder.ToString();
