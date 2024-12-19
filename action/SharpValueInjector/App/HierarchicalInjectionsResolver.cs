@@ -99,7 +99,20 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
                 var stringBuilder = new StringBuilder(value);
                 foreach (var refKey in matches.Select(x => x.Groups["ref"].Value))
                 {
-                    stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", provider.GetRequiredKeyedService<string>(refKey));
+                    if (refKey.Contains('|'))
+                    {
+                        logger.LogCritical("Key {Key} contains unsupported character '|', skipping it", refKey);
+                        continue;
+                    }
+
+                    var refValue = provider.GetKeyedService<string>(refKey);
+                    if (refValue is null)
+                    {
+                        logger.LogError("Key {Key} has missing dependency: '{DependencyKey}', it will most likely resolve to broken injection", key, refKey);
+                        continue;
+                    }
+
+                    stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", refValue);
                 }
 
                 return stringBuilder.ToString();

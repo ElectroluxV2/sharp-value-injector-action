@@ -7,7 +7,7 @@ using Spectre.Console;
 namespace SharpValueInjector.Tests;
 
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
-[Retry(1_000), Timeout(1_000 * 60)] // Working with file system is flaky - dont know why, dont care why, yet
+[Retry(0), Timeout(1_000 * 60)]
 public class IntegrationTests
 {
     [Before(Test)]
@@ -55,7 +55,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -80,7 +80,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -105,7 +105,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -130,7 +130,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -155,7 +155,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -180,7 +180,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -205,7 +205,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -235,7 +235,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -264,7 +264,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -288,7 +288,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
@@ -313,7 +313,7 @@ public class IntegrationTests
             "}",
             null!,
             null!,
-            null!,
+            [],
             LogLevel.Information,
             cancellationToken
         );
