@@ -99,7 +99,14 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
                 var stringBuilder = new StringBuilder(value);
                 foreach (var refKey in matches.Select(x => x.Groups["ref"].Value))
                 {
-                    stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", provider.GetRequiredKeyedService<string>(refKey));
+                    try
+                    {
+                        stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", provider.GetRequiredKeyedService<string>(refKey));
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        throw new AggregateException($"Failed to resolve '{refKey}'", e);
+                    }
                 }
 
                 return stringBuilder.ToString();
