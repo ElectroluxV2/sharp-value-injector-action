@@ -99,6 +99,12 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
                 var stringBuilder = new StringBuilder(value);
                 foreach (var refKey in matches.Select(x => x.Groups["ref"].Value))
                 {
+                    if (refKey.Contains('|'))
+                    {
+                        logger.LogCritical("Key {Key} contains unsupported character '|', skipping it", refKey);
+                        continue;
+                    }
+
                     try
                     {
                         stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", provider.GetRequiredKeyedService<string>(refKey));
