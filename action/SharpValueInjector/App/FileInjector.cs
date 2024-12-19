@@ -32,11 +32,8 @@ public class FileInjector(ILogger<FileInjector> logger)
                         await writer.WriteLineAsync(sb.ToString());
                     }
 
-                    // reader.Close();
-                    // File.Delete(path);
-                    //
-                    // await writer.FlushAsync(cancellationToken);
-                    // writer.Close();
+                    await writer.FlushAsync(cancellationToken);
+                    await Task.Run(() => writer.Flush(), cancellationToken);
                 }
             }
             File.Move($"{path}.injected", path, true);

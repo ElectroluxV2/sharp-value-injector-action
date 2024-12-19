@@ -26,17 +26,17 @@ public class InjectorApp(
     ConsoleCancellationToken consoleCancellationToken
 )
 {
-    private static readonly ConcurrentDictionary<string, string> ResolvedInjectionValues = new();
+    private readonly ConcurrentDictionary<string, string> _resolvedInjectionValues = new();
 
-    private static async ValueTask<string> GetOrResolveInjectionValue(string key, IInjection injection)
+    private async ValueTask<string> GetOrResolveInjectionValue(string key, IInjection injection)
     {
-        if (ResolvedInjectionValues.TryGetValue(key, out var cachedValue))
+        if (_resolvedInjectionValues.TryGetValue(key, out var cachedValue))
         {
             return cachedValue;
         }
 
         var resolved = await injection.ProvisionInjectionValueAsync();
-        ResolvedInjectionValues[key] = resolved;
+        _resolvedInjectionValues[key] = resolved;
         return resolved;
     }
 
@@ -121,9 +121,10 @@ public class InjectorApp(
             .Concat(outputFilesFromConfiguration.ToAsyncEnumerable());
 
         // Concurrent inject
-        await outputFiles
+        var tasks = await outputFiles
             .Select(async path => await fileInjector.InjectAsync(path, configuration.OpeningToken, configuration.ClosingToken, injectionKeySet, valueSupplier, consoleCancellationToken))
             .ToArrayAsync(consoleCancellationToken);
+        await Task.WhenAll(tasks);
 
         await HandlePassthroughAsync(injectionKeySet, valueSupplier);
 
