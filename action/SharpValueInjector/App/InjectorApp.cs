@@ -67,6 +67,7 @@ public class InjectorApp(
             .AddTransient<FileOrDirectoryWithPatternResolver>()
             .AddTransient<UriMapper>()
             .AddTransient<FileFetcher>()
+            .AddTransient<FunctionProcessor>()
             .AddFunctions()
             .BuildServiceProvider();
     }
@@ -115,6 +116,7 @@ public class InjectorApp(
         var injectionKeySet = injections.Keys.ToFrozenSet();
         var valueSupplier = new Func<string, ValueTask<string>>(key => GetOrResolveInjectionValue(key, injections[key]));
 
+        // Links are discard for output as it would require additional config to handle
         var (outputFilesFromConfiguration, outputDirectoriesAndPatterns, _) = fileOrDirectoryWithPatternResolver.SplitAndValidate(configuration.OutputFiles);
         var outputFiles = directoryWalker
             .WalkAsync(outputDirectoriesAndPatterns, configuration.RecurseSubdirectories, configuration.IgnoreCase)

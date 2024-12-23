@@ -324,4 +324,29 @@ public class IntegrationTests
         await Assert.That(code).IsEqualTo(0);
         await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
     }
+
+    [Test]
+    public async Task Bas64_ShouldWork(CancellationToken cancellationToken)
+    {
+        var code = await InjectorApp.BootstrapAsync(
+            [Path.Combine(Samples, "Base64", "*.yml")],
+            [Path.Combine(Samples, "Base64", "*.json")],
+            [],
+            false,
+            false,
+            "#{",
+            "}",
+            null!,
+            null!,
+            [],
+            LogLevel.Information,
+            cancellationToken
+        );
+
+        var beforeFile = Path.Combine(Samples, "Base64", "before.yml");
+        var afterFile = Path.Combine(Samples, "Base64", "after.yml");
+
+        await Assert.That(code).IsEqualTo(0);
+        await AssertFileEqualityAsync(beforeFile, afterFile, cancellationToken);
+    }
 }

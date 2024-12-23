@@ -1,0 +1,8 @@
+cases:
+- 1: "#{Simple.Base64.1}"
+- 2: "#{Simple.Base64.2}"
+- 3: "#{Simple.Base64.3}"
+- 4: "#{Simple.Base64.4}"
+- 5: "#{Simple.Base64.5}"
+- Compound: "#{Compound}"
+- Simple: "#{Simple | ToBase64}"

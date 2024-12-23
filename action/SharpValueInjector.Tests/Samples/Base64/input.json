@@ -1,0 +1,9 @@
+{
+  "Simple": "Injected Value",
+  "Simple.Base64.1": "#{Simple | ToBase64}",
+  "Simple.Base64.2": "#{Simple |ToBase64}",
+  "Simple.Base64.3": "#{Simple| ToBase64}",
+  "Simple.Base64.4": "#{Simple|ToBase64}",
+  "Simple.Base64.5": "#{    Simple  |  ToBase64     }",
+  "Compound": "#{Simple.Base64.5 | ToBase64}"
+}

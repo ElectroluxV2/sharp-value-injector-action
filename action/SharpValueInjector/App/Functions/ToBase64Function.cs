@@ -2,7 +2,7 @@ using System.Text;
 
 namespace SharpValueInjector.App.Functions;
 
-public record Base64Function : IFunction
+public record ToBase64Function : IFunction
 {
     public ValueTask<bool> TryExecuteAsync(string input, out string output)
     {

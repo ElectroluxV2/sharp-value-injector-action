@@ -7,17 +7,17 @@ using SharpValueInjector.App.Injections;
 
 namespace SharpValueInjector.App;
 
-public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolver> logger, JsonSlurp jsonSlurp)
+public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolver> logger, JsonSlurp jsonSlurp, FunctionProcessor functionProcessor)
 {
     public async Task<FrozenDictionary<string, IInjection>> ResolveAsync(IReadOnlyCollection<Stream> variableFiles, IReadOnlyCollection<Stream> secretFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {
+        var secretInjections = await ResolveSecretInjectionsAsync(secretFiles, openingToken, closingToken, cancellationToken);
         var variableInjections = await ResolveVariableInjectionsAsync(variableFiles, openingToken, closingToken, cancellationToken);
-        var secretInjections = await ResolveSecretInjectionsAsync(secretFiles, cancellationToken);
 
         return variableInjections.Concat(secretInjections).ToFrozenDictionary();
     }
 
-    private async ValueTask<FrozenDictionary<string, IInjection>> ResolveSecretInjectionsAsync(IReadOnlyCollection<Stream> secretFiles, CancellationToken cancellationToken)
+    private async ValueTask<FrozenDictionary<string, IInjection>> ResolveSecretInjectionsAsync(IReadOnlyCollection<Stream> secretFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {
         var conflictlessInjections = new Dictionary<string, AwsSmInjection>();
         foreach (var inputFile in secretFiles)
@@ -41,6 +41,23 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
                 conflictlessInjections[key] = injection;
             }
         }
+
+        // TODO: Implement secret interpolation using new secret authoring format & add debug secret type for integration tests
+        // var findRefsRegex = new Regex($"{Regex.Escape(openingToken)}(?<ref>[^{Regex.Escape(closingToken)}]+){Regex.Escape(closingToken)}");
+        // var serviceCollection = new ServiceCollection();
+        // var recursionTracker = new Dictionary<string, bool>();
+        // foreach (var (key, value) in conflictlessInjections)
+        // {
+        //     var processedValue = await functionProcessor.ProcesAsync(key, value, openingToken, closingToken);
+        //     var matches = findRefsRegex.Matches(processedValue);
+        //
+        //     if (matches.Count == 0)
+        //     {
+        //         logger.LogInformation("Registering key {Key} => {Value}", key, processedValue);
+        //         serviceCollection.AddKeyedSingleton(key, processedValue);
+        //         continue;
+        //     }
+        // }
 
         return conflictlessInjections.ToFrozenDictionary(x => x.Key, IInjection (x) => x.Value);
     }
@@ -78,16 +95,19 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
         var recursionTracker = new Dictionary<string, bool>();
         foreach (var (key, value) in conflictlessInjections)
         {
-            var matches = findRefsRegex.Matches(value);
+            var processedValue = await functionProcessor.ProcesAsync(key, value, openingToken, closingToken);
+            var matches = findRefsRegex.Matches(processedValue);
 
             if (matches.Count == 0)
             {
-                logger.LogInformation("Registering key {Key} => {Value}", key, value);
-                serviceCollection.AddKeyedSingleton(key, value);
+                logger.LogInformation("Registering key {Key} => {Value}", key, processedValue);
+                serviceCollection.AddKeyedSingleton(key, processedValue);
                 continue;
             }
 
-            logger.LogInformation("Registering key {Key} => {Value} with dependencies {Dependencies}", key, value, string.Join(',', matches.Select(x => x.Groups["ref"].Value)));
+            logger.LogInformation("Registering key {Key} => {Value} with dependencies {Dependencies}", key, processedValue, string.Join(',', matches.Select(x => x.Groups["ref"].Value)));
+
+
             serviceCollection.AddKeyedSingleton<string>(key, (provider, _) =>
             {
                 if (!recursionTracker.TryAdd(key, true))
@@ -99,11 +119,6 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
                 var stringBuilder = new StringBuilder(value);
                 foreach (var refKey in matches.Select(x => x.Groups["ref"].Value))
                 {
-                    if (refKey.Contains('|'))
-                    {
-                        logger.LogCritical("Key {Key} contains unsupported character '|', skipping it", refKey);
-                        continue;
-                    }
 
                     var refValue = provider.GetKeyedService<string>(refKey);
                     if (refValue is null)
