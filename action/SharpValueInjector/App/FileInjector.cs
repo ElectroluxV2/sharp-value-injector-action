@@ -29,7 +29,14 @@ public class FileInjector(ILogger<FileInjector> logger, FunctionProcessor functi
                         foreach (var key in injections)
                         {
                             logger.LogTrace("Trying: {Key}", key);
-                            sb.Replace($"{openingToken}{key}{closingToken}", await injectionValueSupplier(key));
+                            var value = $"{openingToken}{key}{closingToken}";
+                            var index = sb.ToString().IndexOf(value, StringComparison.InvariantCulture);
+                            if (index != -1)
+                            {
+                                var replacement = await injectionValueSupplier(key);
+                                logger.LogInformation("Key: {Key} was injected with {Value} in {Path}", key, replacement, path);
+                                sb.Replace($"{openingToken}{key}{closingToken}", replacement, index, sb.Length - index);
+                            }
                         }
 
                         // TODO: Remove this scope once we may get rid of legacy Octopus like behaviour

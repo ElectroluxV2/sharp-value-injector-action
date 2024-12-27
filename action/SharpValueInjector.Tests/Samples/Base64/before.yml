@@ -6,3 +6,4 @@ cases:
 - 5: "#{Simple.Base64.5}"
 - Compound: "#{Compound}"
 - Simple: "#{Simple | ToBase64}"
+- Secret: "#{SimpleSecret.Interpolated}"

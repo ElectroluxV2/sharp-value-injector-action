@@ -16,4 +16,6 @@ public interface IInjection
     /// </summary>
     /// <returns>Value that is going to be used when logging</returns>
     public ValueTask<string> ProvisionLogValueAsync(CancellationToken cancellationToken = default) => ProvisionInjectionValueAsync(cancellationToken);
+
+    public bool SupportsExpressions => true;
 }

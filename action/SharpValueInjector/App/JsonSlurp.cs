@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -61,7 +62,53 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
         return dictionary.ToFrozenDictionary();
     }
 
-    public FrozenDictionary<string, AwsSmInjection> FlattenSecrets(ReadOnlySpan<byte> json)
+    private static class InjectionFactory
+    {
+        public static bool TryCreateInjection(FrozenDictionary<string, string> properties, [NotNullWhen(true)] out IInjection? injection)
+        {
+            var type = properties.GetValueOrDefault("type");
+            if (type is null)
+            {
+                injection = null;
+                return false;
+            }
+
+            switch (type)
+            {
+                case "aws-sm-dictionary":
+                {
+                    if (!properties.TryGetValue("secretid", out var secretId))
+                    {
+                        throw new NotSupportedException("secretId is required for aws-sm-dictionary");
+                    }
+
+                    if (!properties.TryGetValue("key", out var key))
+                    {
+                        throw new NotSupportedException("key is required for aws-sm-dictionary");
+                    }
+
+                    injection = new AwsSmInjection(secretId, key);
+                    return true;
+                }
+                case "composite":
+                {
+                    if (!properties.TryGetValue("value", out var value))
+                    {
+                        throw new NotSupportedException("value is required for composite");
+                    }
+
+                    injection = new PlainTextInjection(value);
+                    return true;
+                }
+                default:
+                {
+                    throw new NotSupportedException($"{type} is not supported injection type");
+                }
+            }
+        }
+    }
+
+    public FrozenDictionary<string, IInjection> FlattenSecrets(ReadOnlySpan<byte> json)
     {
         logger.LogDebug("Parsing JSON size: {JsonSize}", Utils.BytesToString(json.Length));
 
@@ -74,7 +121,7 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
 
         var keyStack = new Stack<string>();
         var lastPropertyName = string.Empty;
-        var dictionary = new Dictionary<string, AwsSmInjection>();
+        var dictionary = new Dictionary<string, IInjection>();
         var readProperties = new Dictionary<string, string>();
 
         while (reader.Read())
@@ -85,26 +132,11 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
             }
             else if (reader.TokenType == JsonTokenType.EndObject)
             {
-                if (readProperties.TryGetValue("type", out var typeProp))
+                if (InjectionFactory.TryCreateInjection(readProperties.ToFrozenDictionary(), out var injection))
                 {
                     // PERF: We could load some memory blob and reuse it with these string combinations
                     var keyFromStack = string.Join('.', keyStack.Reverse().Where(x => x.Trim().Length != 0));
-                    if (typeProp != "aws-sm-dictionary")
-                    {
-                        throw new NotSupportedException($"{typeProp} is not supported secret type");
-                    }
 
-                    if (!readProperties.TryGetValue("secretId", out var secretIdProp))
-                    {
-                        throw new NotSupportedException($"secretId is required at {keyFromStack}");
-                    }
-
-                    if (!readProperties.TryGetValue("key", out var keyProp))
-                    {
-                        throw new NotSupportedException($"key is required at {keyFromStack}");
-                    }
-
-                    var injection = new AwsSmInjection(secretIdProp, keyProp);
                     logger.LogDebug("Found key {Key} with {AwsSmInjection}", keyFromStack, injection);
 
                     if (!dictionary.TryAdd(keyFromStack, injection))
@@ -129,7 +161,7 @@ public class JsonSlurp(ILogger<JsonSlurp> logger)
 
                 var value = reader.ReadCurrentPropertyAsString();
 
-                readProperties[lastReadKey] = value;
+                readProperties[lastReadKey.ToLowerInvariant()] = value;
             }
         }
 

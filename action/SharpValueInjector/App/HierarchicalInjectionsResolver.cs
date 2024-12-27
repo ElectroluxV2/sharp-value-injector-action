@@ -19,7 +19,7 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
 
     private async ValueTask<FrozenDictionary<string, IInjection>> ResolveSecretInjectionsAsync(IReadOnlyCollection<Stream> secretFiles, string openingToken, string closingToken, CancellationToken cancellationToken)
     {
-        var conflictlessInjections = new Dictionary<string, AwsSmInjection>();
+        var conflictlessInjections = new Dictionary<string, IInjection>();
         foreach (var inputFile in secretFiles)
         {
             logger.LogInformation("Reading secret file {InputFile}", inputFile);
@@ -31,7 +31,7 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
 
             foreach (var (key, injection) in flattened)
             {
-                logger.LogInformation("Found key {Key} with injection {AwsSmInjection}", key, injection);
+                logger.LogInformation("Found key {Key} with injection {Injection}", key, injection);
 
                 if (conflictlessInjections.ContainsKey(key))
                 {
@@ -42,24 +42,66 @@ public class HierarchicalInjectionsResolver(ILogger<HierarchicalInjectionsResolv
             }
         }
 
-        // TODO: Implement secret interpolation using new secret authoring format & add debug secret type for integration tests
-        // var findRefsRegex = new Regex($"{Regex.Escape(openingToken)}(?<ref>[^{Regex.Escape(closingToken)}]+){Regex.Escape(closingToken)}");
-        // var serviceCollection = new ServiceCollection();
-        // var recursionTracker = new Dictionary<string, bool>();
-        // foreach (var (key, value) in conflictlessInjections)
-        // {
-        //     var processedValue = await functionProcessor.ProcesAsync(key, value, openingToken, closingToken);
-        //     var matches = findRefsRegex.Matches(processedValue);
-        //
-        //     if (matches.Count == 0)
-        //     {
-        //         logger.LogInformation("Registering key {Key} => {Value}", key, processedValue);
-        //         serviceCollection.AddKeyedSingleton(key, processedValue);
-        //         continue;
-        //     }
-        // }
+        var findRefsRegex = new Regex($"{Regex.Escape(openingToken)}(?<ref>[^{Regex.Escape(closingToken)}]+){Regex.Escape(closingToken)}");
+        var serviceCollection = new ServiceCollection();
+        var recursionTracker = new Dictionary<string, bool>();
+        foreach (var (key, injection) in conflictlessInjections)
+        {
+            if (!injection.SupportsExpressions)
+            {
+                logger.LogTrace("Skipping key {Key} because it does not support expressions", key);
+                continue;
+            }
 
-        return conflictlessInjections.ToFrozenDictionary(x => x.Key, IInjection (x) => x.Value);
+            var value = await injection.ProvisionInjectionValueAsync(cancellationToken);
+            var processedValue = await functionProcessor.ProcesAsync(key, value, openingToken, closingToken);
+            var matches = findRefsRegex.Matches(processedValue);
+
+            if (matches.Count == 0)
+            {
+                logger.LogInformation("Registering key {Key} => {Value}", key, processedValue);
+                serviceCollection.AddKeyedSingleton(key, processedValue);
+                continue;
+            }
+
+            logger.LogInformation("Registering key {Key} => {Value} with dependencies {Dependencies}", key, processedValue, string.Join(',', matches.Select(x => x.Groups["ref"].Value)));
+
+
+            serviceCollection.AddKeyedSingleton<string>(key, (provider, _) =>
+            {
+                if (!recursionTracker.TryAdd(key, true))
+                {
+                    logger.LogWarning("Recursion detected for key {Key}", key);
+                    return $"Error: Recursion detected for key `{key}`!";
+                }
+
+                var stringBuilder = new StringBuilder(value);
+                foreach (var refKey in matches.Select(x => x.Groups["ref"].Value))
+                {
+
+                    var refValue = provider.GetKeyedService<string>(refKey);
+                    if (refValue is null)
+                    {
+                        logger.LogError("Key {Key} has missing dependency: '{DependencyKey}', it will most likely resolve to broken injection", key, refKey);
+                        continue;
+                    }
+
+                    stringBuilder.Replace($"{openingToken}{refKey}{closingToken}", refValue);
+                }
+
+                return stringBuilder.ToString();
+            });
+        }
+
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        return conflictlessInjections
+            .ToFrozenDictionary(
+                x => x.Key,
+                IInjection (x) => x.Value.SupportsExpressions
+                    ? new PlainTextInjection(serviceProvider.GetRequiredKeyedService<string>(x.Key))
+                    : x.Value
+            );
     }
 
     private async ValueTask<FrozenDictionary<string, IInjection>> ResolveVariableInjectionsAsync(IReadOnlyCollection<Stream> variableFiles, string openingToken, string closingToken, CancellationToken cancellationToken)

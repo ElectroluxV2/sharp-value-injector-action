@@ -103,4 +103,5 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
 
     public ValueTask<string> ProvisionInjectionValueAsync(CancellationToken cancellationToken) => AwsSmService.GetSecretValueAsync(ArnOrId, KeyInsideSecret, cancellationToken);
     public ValueTask<string> ProvisionLogValueAsync() => ValueTask.FromResult(ArnOrId);
+    public bool SupportsExpressions => false; // Expressions over secrets are supported with `composite` injection
 }

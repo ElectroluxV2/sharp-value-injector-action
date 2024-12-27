@@ -329,9 +329,9 @@ public class IntegrationTests
     public async Task Bas64_ShouldWork(CancellationToken cancellationToken)
     {
         var code = await InjectorApp.BootstrapAsync(
-            [Path.Combine(Samples, "Base64", "*.yml")],
-            [Path.Combine(Samples, "Base64", "*.json")],
-            [],
+            [Path.Combine(Samples, "Base64", "before.yml")],
+            [Path.Combine(Samples, "Base64", "variables.json")],
+            [Path.Combine(Samples, "Base64", "secrets.json")],
             false,
             false,
             "#{",
@@ -339,7 +339,7 @@ public class IntegrationTests
             null!,
             null!,
             [],
-            LogLevel.Information,
+            LogLevel.Trace,
             cancellationToken
         );
 
