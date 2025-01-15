@@ -61,7 +61,9 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
         {
             if (SecretsCache.TryGetValue(arnOrId, out var secret))
             {
-                return secret.GetValueOrDefault(keyInsideSecret);
+                var x = secret.GetValueOrDefault(keyInsideSecret);
+                await Console.Out.WriteLineAsync("Key: " + keyInsideSecret + " Value: " + x);
+                return x;
             }
 
             FrozenDictionary<string, string>? dict = null;
