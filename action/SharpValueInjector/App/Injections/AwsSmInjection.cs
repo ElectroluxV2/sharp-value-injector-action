@@ -62,7 +62,7 @@ public record AwsSmInjection(string ArnOrId, string KeyInsideSecret) : IInjectio
             if (SecretsCache.TryGetValue(arnOrId, out var secret))
             {
                 var x = secret.GetValueOrDefault(keyInsideSecret);
-                await Console.Out.WriteLineAsync("Key: " + keyInsideSecret + " Value: " + x);
+                await Console.Out.WriteLineAsync("---------Key: " + keyInsideSecret + " Value: " + x);
                 return x;
             }
 
